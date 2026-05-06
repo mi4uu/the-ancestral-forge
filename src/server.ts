@@ -1,4 +1,5 @@
 import { Elysia } from "elysia";
+import { staticPlugin } from "@elysiajs/static";
 import { loadArticles, loadArticle } from "./content";
 import { getConfig } from "./config";
 import { renderHome, renderArticle, renderListing, renderSearch, renderLogin, render404 } from "./templates";
@@ -13,6 +14,7 @@ const html = (body: string, status = 200) =>
   new Response(body, { status, headers: { "Content-Type": "text/html; charset=utf-8" } });
 
 const app = new Elysia()
+  .use(staticPlugin({ prefix: "/images", assets: "public/images" }))
   // ── Home ─────────────────────────────────────────────────────
   .get("/", async () => {
     const articles = await loadArticles();
