@@ -9,11 +9,11 @@ Build site: context/plans/build-site.md
 | Task | Status | Notes |
 |------|--------|-------|
 | T-013 | DONE | src/auth/sessions.ts — crypto.randomUUID, Map + file persistence |
-| T-014 | DONE | GET /logout — destroys session, clears cookie, 303 redirect |
-| T-021 | DONE | GET /auth/login — redirects to Patreon OAuth with correct params |
-| T-022 | | Patreon OAuth callback (token exchange + session creation implemented) |
-| T-023 | | OAuth error handling |
-| T-024 | | Pledge verification |
-| T-025 | | Pledge status refresh |
-| T-026 | | User context middleware |
-| T-027 | | Login prompt template |
+| T-014 | DONE | GET /logout — destroys session, clears cookie, 303 |
+| T-021 | DONE | GET /auth/login — redirects to Patreon OAuth |
+| T-022 | DONE | GET /auth/callback — exchanges code, creates session, sets cookie |
+| T-023 | DONE | OAuth error handling — denied access + token exchange failure |
+| T-024 | DONE | fetchPatreonUser checks pledge >= minPledgeThreshold |
+| T-025 | DONE | Periodic pledge refresh via lastPledgeCheck in middleware |
+| T-026 | DONE | getUserContext middleware — isLoggedIn, isPatron, displayName, userId |
+| T-027 | DONE | Login prompt template for unauthenticated/non-patron users |
