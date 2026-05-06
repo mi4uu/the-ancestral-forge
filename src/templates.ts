@@ -477,18 +477,22 @@ function renderComments(slug: string, comments: Comment[], user: UserContext): s
   </section>`;
 }
 
-function renderPaywall(): string {
+function renderPaywall(article: Article): string {
   return `<div style="text-align:center;padding:48px 32px;margin:32px 0;background:${P.paper};border:1px solid ${P.ink}33;">
-    <h3 style="font-family:${FONT};font-size:28px;font-weight:800;margin-bottom:12px;">This article is for patrons</h3>
-    <p style="font-size:16px;color:${P.muted};margin-bottom:24px;">Support ${cfg.name} for $${cfg.minPledgeThreshold}/month to unlock all articles.</p>
-    <a href="/auth/login" style="display:inline-block;padding:12px 32px;background:${P.ink};color:${P.bg};font-size:12px;letter-spacing:0.22em;font-weight:700;text-transform:uppercase;text-decoration:none;">Unlock with Patreon</a>
+    <h3 style="font-family:${FONT};font-size:28px;font-weight:800;margin-bottom:12px;">Members Only</h3>
+    <p style="font-size:16px;color:${P.muted};margin-bottom:12px;">This article is available exclusively for members.</p>
+    <p style="font-size:14px;color:${P.muted};margin-bottom:24px;">Join for $${cfg.minPledgeThreshold}/month to read now, or wait — this article becomes free for everyone in ${cfg.paywallWindowDays} days.</p>
+    <a href="https://buymeacoffee.com/TheAncestralForge" target="_blank" style="display:inline-block;padding:14px 32px;background:${P.ink};color:${P.bg};font-size:12px;letter-spacing:0.22em;font-weight:700;text-transform:uppercase;text-decoration:none;box-shadow:2px 2px 0 ${P.gold};">Become a Member</a>
+    <p style="font-size:12px;color:${P.muted};margin-top:16px;">Already a member? <a href="/auth/login" style="color:${P.gold};font-weight:600;">Sign in</a></p>
   </div>`;
 }
 
 export function renderArticle(article: Article, user: UserContext = defaultUser, comments: Comment[] = []): string {
   const gated = isArticleGated(article);
   const hasAccess = canUserAccessArticle(article, user);
-  const bodyContent = hasAccess ? article.body : renderPaywall();
+  const bodyContent = hasAccess
+    ? article.body
+    : `<p class="article-p" style="font-size:17px;line-height:1.7;">${article.excerpt}</p>\n${renderPaywall(article)}`;
 
   return `${head({ title: `${article.title} — ${cfg.name}`, description: article.excerpt, ogTitle: article.title, ogDescription: article.excerpt })}
 ${nav()}
