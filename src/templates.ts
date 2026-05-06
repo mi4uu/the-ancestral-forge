@@ -1,19 +1,37 @@
 import type { Article } from "./content";
 import { getIllustration } from "./illustrations";
+import { getConfig } from "./config";
 
-const P = {
-  bg: "#F5EFE0", paper: "#EFE7D5", ink: "#1A2F24",
-  muted: "#5C6B5F", gold: "#B8860B", accent: "#2F5A3D", deep: "#0F1F17",
-};
-const FONT = `'Playfair Display', 'Source Serif Pro', Georgia, serif`;
+const cfg = getConfig();
+const P = cfg.palette;
+const FONT = cfg.typography.heading;
 
-function head(title: string) {
+interface SeoMeta {
+  title: string;
+  description?: string;
+  ogTitle?: string;
+  ogDescription?: string;
+  ogImage?: string;
+}
+
+function head(titleOrMeta: string | SeoMeta) {
+  const meta: SeoMeta = typeof titleOrMeta === "string" ? { title: titleOrMeta } : titleOrMeta;
+  const desc = meta.description || cfg.description;
+  const ogTitle = meta.ogTitle || meta.title;
+  const ogDesc = meta.ogDescription || desc;
+  const ogImage = meta.ogImage || "";
+
   return `<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>${title}</title>
+<title>${meta.title}</title>
+<meta name="description" content="${desc}"/>
+<meta property="og:title" content="${ogTitle}"/>
+<meta property="og:description" content="${ogDesc}"/>
+${ogImage ? `<meta property="og:image" content="${ogImage}"/>` : ""}
+<link rel="alternate" type="application/rss+xml" title="${cfg.name}" href="/rss"/>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,700;0,800;0,900;1,400;1,500;1,700&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,700;1,400;1,500&family=Merriweather:ital,wght@0,400;0,700;0,900;1,400&display=swap" rel="stylesheet"/>
@@ -207,7 +225,7 @@ function nav() {
   <div class="nav-eyebrow">
     <span>EST. ANNO MMXXIV  ·  VOL. III  ·  №  47</span>
     <span class="hide-mobile">MONDAY  ·  4 MAY 2026  ·  WAXING GIBBOUS  ·  FROST WARN: NONE</span>
-    <span>SUBSCRIBERS: 84,512</span>
+    <span>SUBSCRIBERS: ${cfg.subscriberCountText}</span>
   </div>
   <nav class="nav-main">
     <a href="/" class="nav-logo">
@@ -216,14 +234,10 @@ function nav() {
         <path d="M 14 30 L 26 30 L 28 34 L 12 34 Z"/>
         <path d="M 20 8 L 20 14 M 16 11 L 24 11"/>
       </svg>
-      <span>THE ANCESTRAL FORGE</span>
+      <span>${cfg.name.toUpperCase()}</span>
     </a>
     <div class="nav-links">
-      <a href="#">The Apothecary</a>
-      <a href="#">The Living Pantry</a>
-      <a href="#">The Forge</a>
-      <a href="#">Field Notes</a>
-      <a href="#">Archive</a>
+      ${cfg.nav.map((n) => `<a href="${n.href}">${n.label}</a>`).join("\n      ")}
     </div>
     <div class="nav-actions">
       <button class="btn-search" aria-label="Search">
@@ -243,32 +257,24 @@ function footer() {
   <div class="footer-inner">
     <div class="footer-grid">
       <div>
-        <div class="footer-brand">THE  ANCESTRAL  FORGE</div>
-        <p class="footer-desc">An editorial dispatch on self-sufficiency, lost ancestral knowledge, off-grid engineering, and the medicinal plants the modern world has forgotten how to use.</p>
+        <div class="footer-brand">${cfg.name.toUpperCase()}</div>
+        <p class="footer-desc">${cfg.description}</p>
       </div>
-      <div class="footer-col">
-        <div class="footer-col-head">◆ SECTIONS</div>
-        <ul><li><a href="#">The Apothecary</a></li><li><a href="#">The Living Pantry</a></li><li><a href="#">The Forge</a></li><li><a href="#">Field Notes</a></li><li><a href="#">Archive</a></li></ul>
-      </div>
-      <div class="footer-col">
-        <div class="footer-col-head">◆ THE VAULT</div>
-        <ul><li><a href="#">Subscribe</a></li><li><a href="#">Members' Library</a></li><li><a href="#">Annual Almanac</a></li><li><a href="#">Seed Exchange</a></li></ul>
-      </div>
-      <div class="footer-col">
-        <div class="footer-col-head">◆ CORRESPOND</div>
-        <ul><li><a href="#">Submit a Dispatch</a></li><li><a href="#">Letters Column</a></li><li><a href="#">Mailing Address</a></li><li><a href="#">Press</a></li></ul>
-      </div>
+      ${cfg.footer.columns.map((col) => `<div class="footer-col">
+        <div class="footer-col-head">◆ ${col.heading}</div>
+        <ul>${col.links.map((l) => `<li><a href="${l.href}">${l.label}</a></li>`).join("")}</ul>
+      </div>`).join("\n      ")}
       <div></div>
     </div>
     <div class="footer-bottom">
-      <span>©  2026  THE  ANCESTRAL  FORGE.  RECLAIMING  THE  LOST  ARTS.</span>
+      <span>©  ${new Date().getFullYear()}  ${cfg.name.toUpperCase()}.  RECLAIMING  THE  LOST  ARTS.</span>
       <div class="footer-bottom-links">
-        <a href="#">PRIVACY</a><a href="#">TERMS</a><a href="#">COLOPHON</a><a href="#">RSS</a>
+        <a href="#">PRIVACY</a><a href="#">TERMS</a><a href="#">COLOPHON</a><a href="/rss">RSS</a>
       </div>
     </div>
     <div class="footer-disclaimer">
       <strong>Medical Disclaimer  ·  </strong>
-      The botanical, nutritional, and engineering information published in this journal is offered for educational and historical purposes only. Nothing presented here is intended to diagnose, treat, cure, or prevent any disease, nor to replace the counsel of a qualified medical practitioner. Consult your physician before altering diet, supplementation, or medication. The Ancestral Forge accepts no responsibility for outcomes arising from the application of this material.
+      ${cfg.footer.legalDisclaimer}
     </div>
   </div>
 </footer>`;
@@ -289,7 +295,7 @@ function newsletter() {
       </div>
     </form>
     <div class="trust">
-      <span>✓  84,512  READERS</span>
+      <span>✓  ${cfg.subscriberCountText}  READERS</span>
       <span style="opacity:0.4">|</span>
       <span>✓  ONE  EMAIL  PER  WEEK</span>
       <span style="opacity:0.4">|</span>
@@ -300,6 +306,16 @@ function newsletter() {
 }
 
 export function renderHome(articles: Article[]): string {
+  if (!articles.length) {
+    return `${head({ title: `${cfg.name} — ${cfg.tagline}`, description: cfg.description })}
+${nav()}
+<div style="max-width:600px;margin:120px auto;text-align:center;padding:0 32px;">
+  <h1 style="font-family:${FONT};font-size:48px;margin-bottom:16px;">No articles yet</h1>
+  <p style="font-size:17px;color:${P.muted};">Check back soon.</p>
+</div>
+${footer()}
+</body></html>`;
+  }
   const featured = articles.find((a) => a.featured) || articles[0];
   const grid = articles.filter((a) => !a.featured).slice(0, 3);
   const secondary = articles.filter((a) => !a.featured).slice(3, 5);
@@ -345,7 +361,7 @@ export function renderHome(articles: Article[]): string {
     )
     .join("");
 
-  return `${head("The Ancestral Forge — Hidden Facts. Forgotten Plants. Unbreakable Independence.")}
+  return `${head({ title: `${cfg.name} — ${cfg.tagline}`, description: cfg.description })}
 ${nav()}
 
 <section class="hero">
@@ -419,7 +435,7 @@ ${footer()}
 }
 
 export function renderArticle(article: Article): string {
-  return `${head(`${article.title} — The Ancestral Forge`)}
+  return `${head({ title: `${article.title} — ${cfg.name}`, description: article.excerpt, ogTitle: article.title, ogDescription: article.excerpt })}
 ${nav()}
 
 <article class="article-page">
@@ -439,8 +455,54 @@ ${footer()}
 </body></html>`;
 }
 
+export function renderListing(title: string, articles: Article[]): string {
+  const cards = articles.length
+    ? articles.map((a) => `
+    <article class="card" style="padding:28px 0;border-bottom:1px dashed ${P.ink}55;">
+      <div class="card-cat" style="font-size:10px;letter-spacing:0.32em;font-weight:700;color:${P.gold};margin-bottom:8px;">◆ ${a.category.toUpperCase()}</div>
+      <h3 style="font-family:${FONT};font-weight:800;font-size:24px;line-height:1.05;margin-bottom:8px;"><a href="/articles/${a.slug}">${a.title}</a></h3>
+      <p style="font-size:14px;line-height:1.55;color:${P.ink}CC;margin-bottom:8px;">${a.excerpt}</p>
+      <div style="font-size:11px;letter-spacing:0.18em;color:${P.muted};">BY <strong style="color:${P.ink}">${a.author}</strong> · ${a.readTime} MIN READ</div>
+    </article>`).join("")
+    : `<p style="font-size:17px;color:${P.muted};padding:48px 0;">No articles found in this section yet.</p>`;
+
+  return `${head({ title: `${title} — ${cfg.name}` })}
+${nav()}
+<section style="max-width:900px;margin:0 auto;padding:48px 32px;">
+  <h1 style="font-family:${FONT};font-weight:800;font-size:clamp(36px,5vw,56px);line-height:1;margin-bottom:32px;border-bottom:2px solid ${P.ink};padding-bottom:16px;">${title}</h1>
+  ${cards}
+</section>
+${footer()}
+</body></html>`;
+}
+
+export function renderSearch(query: string, articles: Article[]): string {
+  const content = !query
+    ? `<p style="font-size:17px;color:${P.muted};padding:48px 0;">Enter a search term to find articles.</p>`
+    : articles.length
+      ? articles.map((a) => `
+    <article style="padding:20px 0;border-bottom:1px dashed ${P.ink}55;">
+      <h3 style="font-family:${FONT};font-weight:800;font-size:22px;margin-bottom:6px;"><a href="/articles/${a.slug}">${a.title}</a></h3>
+      <p style="font-size:14px;color:${P.ink}CC;margin-bottom:4px;">${a.excerpt}</p>
+      <span style="font-size:11px;color:${P.muted};">${a.readTime} MIN READ</span>
+    </article>`).join("")
+      : `<p style="font-size:17px;color:${P.muted};padding:48px 0;">No articles found for "${query}".</p>`;
+
+  return `${head({ title: `Search: ${query || "..."} — ${cfg.name}` })}
+${nav()}
+<section style="max-width:900px;margin:0 auto;padding:48px 32px;">
+  <h1 style="font-family:${FONT};font-weight:800;font-size:36px;margin-bottom:24px;">Search</h1>
+  <form action="/search" method="GET" style="margin-bottom:32px;">
+    <input type="text" name="q" value="${query}" placeholder="Search articles..." style="width:100%;padding:12px 16px;font-size:16px;border:1px solid ${P.ink};background:${P.bg};font-family:${FONT};"/>
+  </form>
+  ${content}
+</section>
+${footer()}
+</body></html>`;
+}
+
 export function render404(): string {
-  return `${head("Not Found — The Ancestral Forge")}
+  return `${head({ title: `Not Found — ${cfg.name}` })}
 ${nav()}
 <div style="max-width:600px;margin:120px auto;text-align:center;padding:0 32px;">
   <h1 style="font-family:${FONT};font-size:64px;margin-bottom:16px;">404</h1>
