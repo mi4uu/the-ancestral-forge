@@ -1,6 +1,10 @@
 import type { Article } from "./content";
 import { getIllustration } from "./illustrations";
 import { getConfig } from "./config";
+import type { UserContext } from "./auth/middleware";
+import type { Comment } from "./community/storage";
+import { sanitizeComment, sanitizeDisplayName } from "./community/safety";
+import { isArticleGated, canUserAccessArticle } from "./vault/paywall";
 
 const cfg = getConfig();
 const P = cfg.palette;
@@ -434,12 +438,63 @@ ${footer()}
 </body></html>`;
 }
 
-export function renderArticle(article: Article): string {
+const defaultUser: UserContext = { isLoggedIn: false, isPatron: false, displayName: null, userId: null };
+
+function renderComments(slug: string, comments: Comment[], user: UserContext): string {
+  const adminIds = cfg.adminUserIds;
+  const isAdmin = user.userId ? adminIds.includes(user.userId) : false;
+
+  const commentList = comments.length
+    ? comments.map((c) => `
+      <div style="padding:16px 0;border-bottom:1px dashed ${P.ink}33;">
+        <div style="font-size:12px;color:${P.muted};margin-bottom:6px;">
+          <strong style="color:${P.ink};">${sanitizeDisplayName(c.authorName)}</strong>
+          · ${new Date(c.timestamp).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" })}
+          ${isAdmin ? `<form method="POST" action="/articles/${slug}/comments/${c.id}/delete" style="display:inline;margin-left:12px;"><button type="submit" style="background:none;border:none;color:${P.gold};cursor:pointer;font-size:11px;">delete</button></form>` : ""}
+        </div>
+        <div style="font-size:15px;line-height:1.6;">${sanitizeComment(c.body)}</div>
+      </div>`).join("")
+    : user.isPatron
+      ? `<p style="color:${P.muted};font-style:italic;">Be the first to comment.</p>`
+      : `<p style="color:${P.muted};font-size:13px;">No comments yet.</p>`;
+
+  let form = "";
+  if (user.isLoggedIn && user.isPatron) {
+    form = `<form method="POST" action="/articles/${slug}/comments" style="margin-top:24px;">
+      <textarea name="body" rows="3" required placeholder="Share your thoughts..." style="width:100%;padding:12px;font-size:15px;border:1px solid ${P.ink}33;background:${P.bg};font-family:${cfg.typography.body};resize:vertical;"></textarea>
+      <button type="submit" style="margin-top:8px;padding:10px 20px;font-size:12px;letter-spacing:0.2em;font-weight:700;text-transform:uppercase;background:${P.ink};color:${P.bg};border:none;cursor:pointer;">Post Comment</button>
+    </form>`;
+  } else if (user.isLoggedIn) {
+    form = `<p style="margin-top:24px;padding:16px;background:${P.paper};border:1px solid ${P.ink}33;font-size:14px;color:${P.muted};">Commenting is a patron benefit. <a href="https://www.patreon.com" style="color:${P.gold};font-weight:600;">Become a patron</a> to join the conversation.</p>`;
+  } else {
+    form = `<p style="margin-top:24px;padding:16px;background:${P.paper};border:1px solid ${P.ink}33;font-size:14px;color:${P.muted};"><a href="/auth/login" style="color:${P.gold};font-weight:600;">Log in via Patreon</a> to comment.</p>`;
+  }
+
+  return `<section id="comments" style="max-width:780px;margin:0 auto;padding:0 32px 64px;">
+    <h2 style="font-family:${FONT};font-size:28px;font-weight:800;margin-bottom:16px;padding-bottom:12px;border-bottom:2px solid ${P.ink};">Comments (${comments.length})</h2>
+    ${commentList}
+    ${form}
+  </section>`;
+}
+
+function renderPaywall(): string {
+  return `<div style="text-align:center;padding:48px 32px;margin:32px 0;background:${P.paper};border:1px solid ${P.ink}33;">
+    <h3 style="font-family:${FONT};font-size:28px;font-weight:800;margin-bottom:12px;">This article is for patrons</h3>
+    <p style="font-size:16px;color:${P.muted};margin-bottom:24px;">Support ${cfg.name} for $${cfg.minPledgeThreshold}/month to unlock all articles.</p>
+    <a href="/auth/login" style="display:inline-block;padding:12px 32px;background:${P.ink};color:${P.bg};font-size:12px;letter-spacing:0.22em;font-weight:700;text-transform:uppercase;text-decoration:none;">Unlock with Patreon</a>
+  </div>`;
+}
+
+export function renderArticle(article: Article, user: UserContext = defaultUser, comments: Comment[] = []): string {
+  const gated = isArticleGated(article);
+  const hasAccess = canUserAccessArticle(article, user);
+  const bodyContent = hasAccess ? article.body : renderPaywall();
+
   return `${head({ title: `${article.title} — ${cfg.name}`, description: article.excerpt, ogTitle: article.title, ogDescription: article.excerpt })}
 ${nav()}
 
 <article class="article-page">
-  <div class="article-meta">◆  ${article.category}  ·  ${article.readTime} MIN READ</div>
+  <div class="article-meta">◆  ${article.category.toUpperCase()}  ·  ${article.readTime} MIN READ${gated && !hasAccess ? '  ·  🔒' : ''}</div>
   <h1>${article.title}</h1>
   <div class="article-byline">
     By <strong>${article.author}</strong>${article.authorRole ? ` · ${article.authorRole}` : ""}
@@ -447,9 +502,10 @@ ${nav()}
   <div class="article-hero-img">
     ${getIllustration(article.illustration)}
   </div>
-  ${article.body}
+  ${bodyContent}
 </article>
 
+${renderComments(article.slug, comments, user)}
 ${newsletter()}
 ${footer()}
 </body></html>`;
@@ -460,7 +516,7 @@ export function renderListing(title: string, articles: Article[]): string {
     ? articles.map((a) => `
     <article class="card" style="padding:28px 0;border-bottom:1px dashed ${P.ink}55;">
       <div class="card-cat" style="font-size:10px;letter-spacing:0.32em;font-weight:700;color:${P.gold};margin-bottom:8px;">◆ ${a.category.toUpperCase()}</div>
-      <h3 style="font-family:${FONT};font-weight:800;font-size:24px;line-height:1.05;margin-bottom:8px;"><a href="/articles/${a.slug}">${a.title}</a></h3>
+      <h3 style="font-family:${FONT};font-weight:800;font-size:24px;line-height:1.05;margin-bottom:8px;"><a href="/articles/${a.slug}">${a.title}</a>${isArticleGated(a) ? ' <span style="font-size:14px;color:' + P.gold + ';">🔒</span>' : ''}</h3>
       <p style="font-size:14px;line-height:1.55;color:${P.ink}CC;margin-bottom:8px;">${a.excerpt}</p>
       <div style="font-size:11px;letter-spacing:0.18em;color:${P.muted};">BY <strong style="color:${P.ink}">${a.author}</strong> · ${a.readTime} MIN READ</div>
     </article>`).join("")

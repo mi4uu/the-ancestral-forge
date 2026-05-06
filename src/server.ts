@@ -4,6 +4,10 @@ import { getConfig } from "./config";
 import { renderHome, renderArticle, renderListing, renderSearch, render404 } from "./templates";
 import { getSession, destroySession, createSession, SESSION_COOKIE_NAME } from "./auth/sessions";
 import { getLoginRedirectUrl, exchangeCodeForToken, fetchPatreonUser } from "./auth/patreon";
+import { getUserContext } from "./auth/middleware";
+import { getComments, addComment, deleteComment } from "./community/storage";
+import { sanitizeComment, sanitizeDisplayName } from "./community/safety";
+import { isArticleGated, canUserAccessArticle } from "./vault/paywall";
 
 const html = (body: string, status = 200) =>
   new Response(body, { status, headers: { "Content-Type": "text/html; charset=utf-8" } });
@@ -16,10 +20,12 @@ const app = new Elysia()
   })
 
   // ── Article ──────────────────────────────────────────────────
-  .get("/articles/:slug", async ({ params }) => {
+  .get("/articles/:slug", async ({ params, headers: reqHeaders }) => {
     const article = await loadArticle(params.slug);
     if (!article) return html(render404(), 404);
-    return html(renderArticle(article));
+    const user = await getUserContext(reqHeaders["cookie"]);
+    const comments = await getComments(params.slug);
+    return html(renderArticle(article, user, comments));
   })
 
   // ── Category pages (T-018 placeholder route) ─────────────────
@@ -125,6 +131,41 @@ const app = new Elysia()
     });
   })
 
+  // ── Comments: Submit ─────────────────────────────────────────
+  .post("/articles/:slug/comments", async ({ params, body, headers: reqHeaders }) => {
+    const user = await getUserContext(reqHeaders["cookie"]);
+    if (!user.isLoggedIn || !user.isPatron) {
+      return new Response("Forbidden", { status: 403 });
+    }
+    const commentBody = (body as any)?.body || "";
+    if (!commentBody.trim()) {
+      return new Response("Comment body required", { status: 400 });
+    }
+    await addComment(params.slug, {
+      authorId: user.userId!,
+      authorName: user.displayName || "Patron",
+      body: commentBody.trim(),
+    });
+    return new Response(null, {
+      status: 303,
+      headers: { Location: `/articles/${params.slug}#comments` },
+    });
+  })
+
+  // ── Comments: Delete (admin only) ───────────────────────────
+  .post("/articles/:slug/comments/:id/delete", async ({ params, headers: reqHeaders }) => {
+    const user = await getUserContext(reqHeaders["cookie"]);
+    const adminIds = getConfig().adminUserIds;
+    if (!user.userId || !adminIds.includes(user.userId)) {
+      return new Response("Forbidden", { status: 403 });
+    }
+    await deleteComment(params.slug, params.id);
+    return new Response(null, {
+      status: 303,
+      headers: { Location: `/articles/${params.slug}#comments` },
+    });
+  })
+
   // ── Subscribe ───────────────────────────────────────────────
   .post("/subscribe", async ({ body }) => {
     console.log("Subscribe:", body);
@@ -135,4 +176,5 @@ const app = new Elysia()
   })
   .listen(8001);
 
-console.log(`⚒  The Ancestral Forge running at http://localhost:${app.server!.port}`);
+const cfg = getConfig();
+console.log(`⚒  ${cfg.name} running at http://localhost:${app.server!.port}`);
