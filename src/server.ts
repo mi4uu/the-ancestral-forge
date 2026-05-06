@@ -63,14 +63,19 @@ const app = new Elysia()
     return html(renderSearch(q, scored.map((s) => s.article)));
   })
 
-  // ── RSS (T-035 placeholder) ─────────────────────────────────
+  // ── RSS Feed ─────────────────────────────────────────────────
   .get("/rss", async () => {
-    const cfg = getConfig();
+    const c = getConfig();
     const articles = await loadArticles();
+    const escXml = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
     const items = articles
-      .map((a) => `<item><title>${a.title}</title><link>${cfg.url}/articles/${a.slug}</link><description>${a.excerpt}</description><pubDate>${new Date(a.date).toUTCString()}</pubDate></item>`)
+      .map((a) => {
+        const gated = isArticleGated(a);
+        const desc = gated ? escXml(a.excerpt) : escXml(a.excerpt || a.body.slice(0, 500));
+        return `<item><title>${escXml(a.title)}</title><link>${c.url}/articles/${a.slug}</link><description>${desc}</description><pubDate>${new Date(a.date).toUTCString()}</pubDate></item>`;
+      })
       .join("\n");
-    const xml = `<?xml version="1.0" encoding="UTF-8"?>\n<rss version="2.0"><channel><title>${cfg.name}</title><description>${cfg.description}</description><link>${cfg.url}</link>${items}</channel></rss>`;
+    const xml = `<?xml version="1.0" encoding="UTF-8"?>\n<rss version="2.0"><channel><title>${escXml(c.name)}</title><description>${escXml(c.description)}</description><link>${c.url}</link>\n${items}\n</channel></rss>`;
     return new Response(xml, { headers: { "Content-Type": "application/rss+xml; charset=utf-8" } });
   })
 
