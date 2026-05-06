@@ -249,7 +249,7 @@ function nav() {
           <circle cx="11" cy="11" r="7"/><path d="M 20 20 L 16 16"/>
         </svg>
       </button>
-      <a href="#" class="btn-vault">Unlock the Vault</a>
+      <a href="/auth/login" class="btn-vault">Unlock the Vault</a>
     </div>
   </nav>
 </header>`;
@@ -551,6 +551,31 @@ ${nav()}
   <form action="/search" method="GET" style="margin-bottom:32px;">
     <input type="text" name="q" value="${query}" placeholder="Search articles..." style="width:100%;padding:12px 16px;font-size:16px;border:1px solid ${P.ink};background:${P.bg};font-family:${FONT};"/>
   </form>
+  ${content}
+</section>
+${footer()}
+</body></html>`;
+}
+
+export function renderLogin(error?: string, success?: boolean): string {
+  const content = success
+    ? `<div style="text-align:center;padding:48px 0;">
+        <h2 style="font-family:${FONT};font-size:32px;margin-bottom:16px;">Check your email</h2>
+        <p style="font-size:17px;color:${P.muted};">We sent you a sign-in link. Click it to log in.</p>
+        <p style="font-size:13px;color:${P.muted};margin-top:12px;">Link expires in 15 minutes.</p>
+      </div>`
+    : `<form method="POST" action="/auth/login" style="max-width:400px;margin:0 auto;">
+        <h2 style="font-family:${FONT};font-size:32px;margin-bottom:8px;">Sign in</h2>
+        <p style="font-size:15px;color:${P.muted};margin-bottom:24px;">Enter your email and we'll send you a magic link.</p>
+        ${error ? `<div style="padding:12px;margin-bottom:16px;background:${P.paper};border:1px solid ${P.gold};color:${P.ink};font-size:14px;">${error}</div>` : ""}
+        <input type="email" name="email" required placeholder="your@email.com" style="width:100%;padding:14px 16px;font-size:16px;border:1px solid ${P.ink};background:${P.bg};margin-bottom:16px;font-family:${FONT};"/>
+        <button type="submit" style="width:100%;padding:14px;font-size:13px;letter-spacing:0.2em;font-weight:700;text-transform:uppercase;background:${P.ink};color:${P.bg};border:none;cursor:pointer;">Send Login Link</button>
+        <p style="font-size:12px;color:${P.muted};margin-top:16px;text-align:center;">Active <a href="https://buymeacoffee.com/TheAncestralForge" style="color:${P.gold};">Buy Me a Coffee</a> members get full access to all articles + commenting.</p>
+      </form>`;
+
+  return `${head({ title: `Sign In — ${cfg.name}` })}
+${nav()}
+<section style="max-width:500px;margin:0 auto;padding:80px 32px;">
   ${content}
 </section>
 ${footer()}

@@ -1,13 +1,13 @@
 import { Elysia } from "elysia";
 import { loadArticles, loadArticle } from "./content";
 import { getConfig } from "./config";
-import { renderHome, renderArticle, renderListing, renderSearch, render404 } from "./templates";
+import { renderHome, renderArticle, renderListing, renderSearch, renderLogin, render404 } from "./templates";
 import { getSession, destroySession, createSession, SESSION_COOKIE_NAME } from "./auth/sessions";
-import { getLoginRedirectUrl, exchangeCodeForToken, fetchPatreonUser } from "./auth/patreon";
 import { getUserContext } from "./auth/middleware";
+import { generateMagicToken, verifyMagicToken, sendMagicLinkEmail } from "./auth/magic-link";
+import { checkMembership } from "./auth/bmac";
 import { getComments, addComment, deleteComment } from "./community/storage";
-import { sanitizeComment, sanitizeDisplayName } from "./community/safety";
-import { isArticleGated, canUserAccessArticle } from "./vault/paywall";
+import { isArticleGated } from "./vault/paywall";
 
 const html = (body: string, status = 200) =>
   new Response(body, { status, headers: { "Content-Type": "text/html; charset=utf-8" } });
@@ -28,7 +28,7 @@ const app = new Elysia()
     return html(renderArticle(article, user, comments));
   })
 
-  // ── Category pages (T-018 placeholder route) ─────────────────
+  // ── Category pages ──────────────────────────────────────────
   .get("/category/:slug", async ({ params }) => {
     const articles = await loadArticles();
     const filtered = articles.filter((a) => a.category === params.slug);
@@ -37,14 +37,14 @@ const app = new Elysia()
     return html(renderListing(cat?.name || params.slug, filtered));
   })
 
-  // ── Tag pages (T-019 placeholder route) ──────────────────────
+  // ── Tag pages ───────────────────────────────────────────────
   .get("/tag/:slug", async ({ params }) => {
     const articles = await loadArticles();
     const filtered = articles.filter((a) => a.tags.includes(params.slug));
     return html(renderListing(`Tag: ${params.slug}`, filtered));
   })
 
-  // ── Search (T-020) ──────────────────────────────────────────
+  // ── Search ──────────────────────────────────────────────────
   .get("/search", async ({ query }) => {
     const q = (query.q || "").trim();
     if (!q) return html(renderSearch(q, []));
@@ -63,70 +63,83 @@ const app = new Elysia()
     return html(renderSearch(q, scored.map((s) => s.article)));
   })
 
-  // ── RSS Feed ─────────────────────────────────────────────────
+  // ── RSS Feed ────────────────────────────────────────────────
   .get("/rss", async () => {
     const c = getConfig();
     const articles = await loadArticles();
-    const escXml = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
     const items = articles
       .map((a) => {
         const gated = isArticleGated(a);
-        const desc = gated ? escXml(a.excerpt) : escXml(a.excerpt || a.body.slice(0, 500));
-        return `<item><title>${escXml(a.title)}</title><link>${c.url}/articles/${a.slug}</link><description>${desc}</description><pubDate>${new Date(a.date).toUTCString()}</pubDate></item>`;
+        const desc = gated ? esc(a.excerpt) : esc(a.excerpt || a.body.slice(0, 500));
+        return `<item><title>${esc(a.title)}</title><link>${c.url}/articles/${a.slug}</link><description>${desc}</description><pubDate>${new Date(a.date).toUTCString()}</pubDate></item>`;
       })
       .join("\n");
-    const xml = `<?xml version="1.0" encoding="UTF-8"?>\n<rss version="2.0"><channel><title>${escXml(c.name)}</title><description>${escXml(c.description)}</description><link>${c.url}</link>\n${items}\n</channel></rss>`;
+    const xml = `<?xml version="1.0" encoding="UTF-8"?>\n<rss version="2.0"><channel><title>${esc(c.name)}</title><description>${esc(c.description)}</description><link>${c.url}</link>\n${items}\n</channel></rss>`;
     return new Response(xml, { headers: { "Content-Type": "application/rss+xml; charset=utf-8" } });
   })
 
-  // ── Auth: Login ─────────────────────────────────────────────
-  .get("/auth/login", ({ headers }) => {
-    const returnTo = headers["referer"] || "/";
-    const url = getLoginRedirectUrl(returnTo);
-    return Response.redirect(url, 302);
+  // ── Auth: Login page ────────────────────────────────────────
+  .get("/auth/login", () => {
+    return html(renderLogin());
   })
 
-  // ── Auth: Callback ──────────────────────────────────────────
-  .get("/auth/callback", async ({ query, set }) => {
-    const code = query.code;
-    const error = query.error;
-    const returnTo = query.state || "/";
-
-    if (error || !code) {
-      console.error("[auth] OAuth denied or error:", error);
-      return html(render404(), 400); // TODO: proper error page
+  // ── Auth: Send magic link ───────────────────────────────────
+  .post("/auth/login", async ({ body }) => {
+    const email = ((body as any)?.email || "").trim().toLowerCase();
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return html(renderLogin("Please enter a valid email address."));
     }
 
-    try {
-      const tokenData = await exchangeCodeForToken(code);
-      const user = await fetchPatreonUser(tokenData.access_token);
-      const cfg = getConfig();
-      const token = await createSession({
-        userId: user.id,
-        displayName: user.displayName,
-        isPatron: user.isPatron,
-        lastPledgeCheck: Date.now(),
-      }, cfg.sessionExpirationDays * 24 * 60 * 60 * 1000);
+    const token = generateMagicToken(email);
+    const cfg = getConfig();
+    const magicUrl = `${cfg.url}/auth/verify?token=${encodeURIComponent(token)}`;
 
-      return new Response(null, {
-        status: 303,
-        headers: {
-          Location: typeof returnTo === "string" ? returnTo : "/",
-          "Set-Cookie": `${SESSION_COOKIE_NAME}=${token}; Path=/; HttpOnly; SameSite=Lax; Max-Age=${cfg.sessionExpirationDays * 86400}`,
-        },
-      });
-    } catch (err) {
-      console.error("[auth] Callback error:", err);
-      return html(render404(), 500);
+    const sent = await sendMagicLinkEmail(email, magicUrl);
+    if (!sent) {
+      return html(renderLogin("Failed to send email. Please try again."));
     }
+
+    return html(renderLogin(undefined, true));
+  })
+
+  // ── Auth: Verify magic link ─────────────────────────────────
+  .get("/auth/verify", async ({ query }) => {
+    const token = query.token;
+    if (!token) return html(render404(), 400);
+
+    const email = verifyMagicToken(token);
+    if (!email) {
+      return html(renderLogin("This link has expired or is invalid. Please request a new one."));
+    }
+
+    // Check BMaC membership
+    const membership = await checkMembership(email);
+    const isPatron = membership?.isPatron || false;
+    const displayName = membership?.name || email.split("@")[0];
+
+    const cfg = getConfig();
+    const sessionToken = await createSession({
+      userId: email,
+      displayName,
+      isPatron,
+      lastPledgeCheck: Date.now(),
+    }, cfg.sessionExpirationDays * 24 * 60 * 60 * 1000);
+
+    return new Response(null, {
+      status: 303,
+      headers: {
+        Location: "/",
+        "Set-Cookie": `${SESSION_COOKIE_NAME}=${sessionToken}; Path=/; HttpOnly; SameSite=Lax; Max-Age=${cfg.sessionExpirationDays * 86400}`,
+      },
+    });
   })
 
   // ── Auth: Logout ────────────────────────────────────────────
   .get("/logout", async ({ headers: reqHeaders }) => {
     const cookies = reqHeaders["cookie"] || "";
     const match = cookies.match(new RegExp(`${SESSION_COOKIE_NAME}=([^;]+)`));
-    const token = match?.[1];
-    if (token) await destroySession(token);
+    if (match?.[1]) await destroySession(match[1]);
     return new Response(null, {
       status: 303,
       headers: {
@@ -136,20 +149,20 @@ const app = new Elysia()
     });
   })
 
-  // ── Comments: Submit ─────────────────────────────────────────
+  // ── Comments: Submit ────────────────────────────────────────
   .post("/articles/:slug/comments", async ({ params, body, headers: reqHeaders }) => {
     const user = await getUserContext(reqHeaders["cookie"]);
     if (!user.isLoggedIn || !user.isPatron) {
       return new Response("Forbidden", { status: 403 });
     }
-    const commentBody = (body as any)?.body || "";
-    if (!commentBody.trim()) {
+    const commentBody = ((body as any)?.body || "").trim();
+    if (!commentBody) {
       return new Response("Comment body required", { status: 400 });
     }
     await addComment(params.slug, {
       authorId: user.userId!,
       authorName: user.displayName || "Patron",
-      body: commentBody.trim(),
+      body: commentBody,
     });
     return new Response(null, {
       status: 303,
@@ -157,7 +170,7 @@ const app = new Elysia()
     });
   })
 
-  // ── Comments: Delete (admin only) ───────────────────────────
+  // ── Comments: Delete (admin) ────────────────────────────────
   .post("/articles/:slug/comments/:id/delete", async ({ params, headers: reqHeaders }) => {
     const user = await getUserContext(reqHeaders["cookie"]);
     const adminIds = getConfig().adminUserIds;
