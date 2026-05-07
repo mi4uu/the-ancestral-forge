@@ -1,0 +1,61 @@
+{
+  "prompt": {
+    "3": {
+      "class_type": "KSampler",
+      "inputs": {
+        "seed": 123456789,
+        "steps": 30,
+        "cfg": 7.5,
+        "sampler_name": "dpmpp_2m",
+        "scheduler": "karras",
+        "denoise": 1.0,
+        "model": ["4", 0],
+        "positive": ["6", 0],
+        "negative": ["7", 0],
+        "latent_image": ["5", 0]
+      }
+    },
+    "4": {
+      "class_type": "CheckpointLoaderSimple",
+      "inputs": {
+        "ckpt_name": "sd_xl_base_1.0.safetensors"
+      }
+    },
+    "5": {
+      "class_type": "EmptyLatentImage",
+      "inputs": {
+        "width": 1024,
+        "height": 768,
+        "batch_size": 1
+      }
+    },
+    "6": {
+      "class_type": "CLIPTextEncode",
+      "inputs": {
+        "text": "A parent and child learning a traditional skill together, warm sunlight, intergenerational knowledge transmission, homestead setting, realistic photography style, no text, no letters",
+        "clip": ["4", 1]
+      }
+    },
+    "7": {
+      "class_type": "CLIPTextEncode",
+      "inputs": {
+        "text": "blurry, text, watermark, logo, low quality, distorted, ugly, dark, underexposed, letters, words, characters, labels, alphabet, characters, writing, words, sentences, titles, typography, font, signature, logo, brand, text overlay, caption, subtitle, annotation, callout, speech bubble, thought bubble, any text elements, pseudo-text, gryzmol, artefact, glitch, error",
+        "clip": ["4", 1]
+      }
+    },
+    "8": {
+      "class_type": "VAEDecode",
+      "inputs": {
+        "samples": ["3", 0],
+        "vae": ["4", 2]
+      }
+    },
+    "9": {
+      "class_type": "SaveImage",
+      "inputs": {
+        "images": ["8", 0],
+        "filename_prefix": "pamiec-pokolen-conceptual"
+      }
+    }
+  }
+}

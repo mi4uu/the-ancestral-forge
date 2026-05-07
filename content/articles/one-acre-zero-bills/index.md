@@ -8,6 +8,7 @@ date: 2026-05-05
 readTime: 40
 excerpt: "The USDA says you need 1.2 acres of conventional farmland per person. John Jeavons proved you need 4,000 square feet. Here's the exact planting plan, calorie math, and seasonal schedule to feed a family of four from one acre -- with no tractor, no tiller, and no grocery store."
 illustration: perennial-roots
+heroImage: /images/one-acre-zero-bills-hero.png
 featured: false
 free: true
 ---
@@ -132,6 +133,9 @@ That is 2.4 million calories from the calorie crops alone -- 83% of our target. 
 The numbers work. They have always worked. The question was never arithmetic. It was design.
 
 ---
+
+
+![atmospheric scene](/images/one-acre-zero-bills-scene.png)
 
 ## Part III: Designing the Acre -- Permaculture Zones
 
@@ -369,6 +373,9 @@ Our plan produces 0.37-0.45 pounds of protein per day. The lower bound is tight.
 No one is going protein-deficient on this plan unless they refuse to eat beans. And if you refuse to eat beans, you are not serious about food sovereignty.
 
 ---
+
+
+![close-up detail](/images/one-acre-zero-bills-detail.png)
 
 ## Part VI: The Fat Question
 
@@ -635,6 +642,9 @@ Dried beans, corn, and grains store for 1-3 years in airtight containers. Dried 
 
 ---
 
+
+![the process in action](/images/one-acre-zero-bills-process.png)
+
 ## Part X: The First Five Years -- A Realistic Timeline
 
 The one-acre plan does not produce 3.8 million calories in year one. Anyone who tells you otherwise is selling something. Here is an honest timeline:
@@ -793,6 +803,9 @@ If your soil is pure clay, double-digging with added compost will transform it w
 Start where you are. The soil improves. It always improves, as long as you keep feeding it.
 
 ---
+
+
+![the finished result](/images/one-acre-zero-bills-result.png)
 
 ## Part XIII: The Economics of the Acre
 

@@ -8,6 +8,7 @@ date: 2026-05-04
 readTime: 38
 excerpt: "Every medieval European village had running water without a single electric pump. The ram pump, invented in 1796, lifts water uphill using nothing but the energy of falling water itself. Here's how to build a complete gravity-fed water system for under $200 — from spring capture to kitchen tap."
 illustration: ice-house
+heroImage: /images/water-battery-hero.png
 featured: false
 free: true
 ---
@@ -232,6 +233,9 @@ For higher pressures from rainwater alone, you either need significant natural e
 
 
 ---
+
+
+![atmospheric scene](/images/water-battery-scene.png)
 
 ## Part IV: How Much Water Do You Actually Need?
 
@@ -523,6 +527,9 @@ The ram's performance depends on three adjustable variables:
 
 ---
 
+
+![close-up detail](/images/water-battery-detail.png)
+
 ## Part VII: Storage — The Battery Itself
 
 Your storage tank is the battery. The water source is the charger. The elevation is the voltage. The pipe is the wire. This analogy is not just poetic — it is physically exact. Elevated water stores potential energy that converts to pressure and flow on demand, precisely as a battery stores chemical energy that converts to voltage and current.
@@ -800,6 +807,9 @@ This is the same principle that makes your gravity-fed system work: water will r
 
 ---
 
+
+![the process in action](/images/water-battery-process.png)
+
 ## Part XI: The Ram Pump in History — A Lost Machine Rediscovered
 
 The hydraulic ram deserves its own moment in this story, because its history illustrates how thoroughly we can forget useful technology.
@@ -950,6 +960,9 @@ A full 1,500-gallon tank weighs over six tons. Your foundation, platform, or tow
 
 
 ---
+
+
+![the finished result](/images/water-battery-result.png)
 
 ## Part XIV: Troubleshooting — When Things Go Wrong
 

@@ -8,6 +8,7 @@ date: 2026-04-28
 readTime: 40
 excerpt: "Five plants grow within walking distance of every home in the temperate world. For 10,000 years they were the backbone of field medicine — from Achilles binding his soldiers' wounds with yarrow to Civil War surgeons packing plantain poultices into bullet holes. They're still growing in your lawn. Here's how to identify them, prepare them, and build a first-aid kit that costs nothing."
 illustration: herb-bundle
+heroImage: /images/field-medic-kit-hero.png
 featured: false
 free: true
 ---
@@ -105,6 +106,9 @@ The military use of yarrow is not limited to Greek myth.
 **Yarrow tincture.** Fill a glass jar halfway with dried yarrow (leaves and flowers). Pour 80-proof vodka over the herb until it is covered by at least two centimeters of liquid. Cap tightly, label with the date, and store in a cool, dark place. Shake daily for four to six weeks. Strain through cheesecloth, pressing the plant material to extract all liquid. Bottle in dark glass dropper bottles. To use externally: apply directly to wounds on a clean cloth. To use internally (for digestive complaints or to reduce fever): 30 drops in a small glass of water, up to three times daily. The tincture is stable for five years or more.
 
 ---
+
+
+![atmospheric scene](/images/field-medic-kit-scene.png)
 
 ## III. Broadleaf Plantain: The White Man's Footprint
 
@@ -310,6 +314,9 @@ Respect this plant. It is extraordinarily effective for what it does. But it is 
 
 ---
 
+
+![close-up detail](/images/field-medic-kit-detail.png)
+
 ## VI. German Chamomile: The Gentle Sentinel
 
 ### The Safest Herb in the Kit
@@ -412,6 +419,9 @@ In the Second World War, the Soviet military maintained a formal program of coll
 The lesson of this history is not that herbs should replace modern medicine. It is that the knowledge of medicinal plants is a survival skill — one that has proven its value in every war from Troy to the Somme, and one that costs nothing to learn and nothing to maintain.
 
 ---
+
+
+![the process in action](/images/field-medic-kit-process.png)
 
 ## VIII. Building the Field Medic Kit
 
@@ -557,6 +567,9 @@ Every year, people are poisoned by misidentified plants. This article provides i
 4. **When in doubt, do not use it.** The margin of safety with known plants is wide. The margin of error with misidentified plants is zero.
 
 ---
+
+
+![the finished result](/images/field-medic-kit-result.png)
 
 ## XI. Growing Your Own Apothecary
 

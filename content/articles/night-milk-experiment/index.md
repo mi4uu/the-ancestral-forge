@@ -8,6 +8,7 @@ date: 2026-04-22
 readTime: 32
 excerpt: "In 2005, researchers discovered that milk collected from cows at 2am contains up to four times more melatonin than daytime milk. The finding barely made a ripple. We decided to test it ourselves — with two Nigerian Dwarf goats, a 2am alarm clock, a kefir culture, and a sleep tracker. Here are the 90-day results."
 illustration: mortar
+heroImage: /images/night-milk-experiment-hero.png
 featured: false
 free: false
 ---
@@ -195,6 +196,9 @@ The Germans tried to fix this with an industrial product. It did not work at sca
 But it might work in a backyard.
 
 ---
+
+
+![atmospheric scene](/images/night-milk-experiment-scene.png)
 
 ## Part IV: The Setup — Two Goats and a Hypothesis
 
@@ -458,6 +462,9 @@ Some readers will find this schedule untenable. That is fair. But it is no diffe
 
 ---
 
+
+![close-up detail](/images/night-milk-experiment-detail.png)
+
 ## Part VII: What I Think Is Happening
 
 ### A Working Hypothesis
@@ -590,6 +597,9 @@ I am not selling anything. I am milking goats.
 
 ---
 
+
+![the process in action](/images/night-milk-experiment-process.png)
+
 ## Part X: Deeper Implications
 
 ### Chrononutrition and the Industrial Food Supply
@@ -696,6 +706,9 @@ MELATONIN
 - Normal plasma melatonin: 10-20 pg/mL (day), 80-120 pg/mL (night peak around 2-4 AM).
 
 ---
+
+
+![the finished result](/images/night-milk-experiment-result.png)
 
 ## Appendix B: Comparative Melatonin Content in Foods
 

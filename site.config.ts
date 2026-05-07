@@ -18,7 +18,7 @@ const siteConfig = {
     { label: "The Living Pantry", href: "/category/the-living-pantry" },
     { label: "The Forge", href: "/category/the-forge" },
     { label: "Field Notes", href: "/category/field-notes" },
-    { label: "Archive", href: "/category/archive" },
+    { label: "Archive", href: "/archive" },
   ],
 
   // ── Categories ─────────────────────────────────────────────────
@@ -40,25 +40,20 @@ const siteConfig = {
           { label: "The Living Pantry", href: "/category/the-living-pantry" },
           { label: "The Forge", href: "/category/the-forge" },
           { label: "Field Notes", href: "/category/field-notes" },
-          { label: "Archive", href: "/category/archive" },
+          { label: "Archive", href: "/archive" },
         ],
       },
       {
         heading: "THE VAULT",
         links: [
-          { label: "Subscribe", href: "#" },
-          { label: "Members' Library", href: "#" },
-          { label: "Annual Almanac", href: "#" },
-          { label: "Seed Exchange", href: "#" },
+          { label: "Become a Member", href: "https://buymeacoffee.com/TheAncestralForge" },
+          { label: "Sign In", href: "/auth/login" },
         ],
       },
       {
-        heading: "CORRESPOND",
+        heading: "FOLLOW",
         links: [
-          { label: "Submit a Dispatch", href: "#" },
-          { label: "Letters Column", href: "#" },
-          { label: "Mailing Address", href: "#" },
-          { label: "Press", href: "#" },
+          { label: "RSS Feed", href: "/rss" },
         ],
       },
     ],

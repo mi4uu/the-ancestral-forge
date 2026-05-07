@@ -8,6 +8,7 @@ date: 2026-05-06
 readTime: 35
 excerpt: "Most commercial elderberry syrups are heat-processed into expensive sugar water. The compounds that actually fight viral replication — cyanidin-3-glucoside and cyanidin-3-sambubioside — degrade above 70°C. Here's what the clinical trials actually used, and how to make the real thing."
 illustration: elderberry
+heroImage: /images/elderberry-hero.png
 featured: false
 free: true
 ---
@@ -27,6 +28,8 @@ Hippocrates, writing in the fourth century BCE, described the elder as his "medi
 In every case, the preparation method was consistent: the berries were either fermented into wine, macerated in spirits, pressed into juice and consumed fresh, or dried and stored for winter use. The British Pharmacopoeia included elderberry preparations well into the nineteenth century. The tradition was robust, specific, and — as we now know — pharmacologically sound.
 
 What the tradition did not include was boiling elderberries for 45 minutes, mixing the resulting liquid with a cup of honey, and selling it in a plastic bottle for $28.99.
+
+![Wild elderberry clusters ripening on the branch](/images/elderberry-plant.png)
 
 ## The Billion-Dollar Berry
 
@@ -171,6 +174,8 @@ Milbury and colleagues at Tufts University confirmed that elderberry anthocyanin
 And that is the crux of the entire elderberry problem.
 
 But all of this depends on the anthocyanins being intact.
+
+![Commercial elderberry syrup — a shadow of the original preparation](/images/elderberry-syrup.png)
 
 ## The Heat Problem: How Your Syrup Became Sugar Water
 
@@ -362,6 +367,8 @@ The cytokine storm fear was a case of *in vitro* data being catastrophically mis
 
 That said, a reasonable precaution applies: once a severe cytokine-driven inflammatory process is already underway — in any illness, not just COVID — adding any immune-stimulating substance is unwise. Elderberry is a preventive and early-intervention agent, not a treatment for late-stage critical illness. This distinction matters.
 
+![Apothecary bottles of properly prepared elderberry tincture](/images/elderberry-tincture.png)
+
 ## How to Make Preparations That Actually Work
 
 Now we arrive at the practical section — the part that the supplement industry does not want you to read, because it demonstrates how easy and inexpensive it is to make elderberry preparations at home that are pharmacologically superior to anything on the shelf.
@@ -508,6 +515,8 @@ Not everyone will make their own preparations. If you are purchasing elderberry 
 - **Shelf life of 18–24 months at room temperature**: This requires pasteurization levels of processing that are incompatible with anthocyanin preservation. Properly made elderberry tincture lasts years because the alcohol preserves it — not because it has been sterilized by heat.
 
 - **"Proprietary blend" hiding the elderberry dose**: If you cannot determine how many milligrams of elderberry extract you are consuming per dose, you cannot compare it to what was used in clinical trials.
+
+![Harvesting elderberries by hand — the old way](/images/elderberry-harvest.png)
 
 ## Sourcing Your Elderberries
 

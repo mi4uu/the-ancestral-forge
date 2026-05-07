@@ -8,6 +8,7 @@ date: 2026-04-25
 readTime: 35
 excerpt: "Your great-grandparents could walk onto a piece of land and know within minutes where the water was, which soil would grow food, and where to build a house that would stand for a century. That skill isn't lost — it's just unlearned. Here's the 10-minute protocol that reads a landscape like an open book."
 illustration: perennial-roots
+heroImage: /images/how-to-read-landscape-hero.png
 featured: false
 free: false
 ---
@@ -68,6 +69,9 @@ Mollison advocated observing a property through all four seasons before making a
 The 10-minute protocol in this article synthesizes Yeomans' hierarchy with Mollison's observational methods and adds the practical field indicators that settler families carried in their heads. It is not a substitute for extended observation. But it will tell you, in ten minutes, the things you need to know before you make any commitment to a piece of ground.
 
 ---
+
+
+![atmospheric scene](/images/how-to-read-landscape-scene.png)
 
 ## Part II: Reading Water
 
@@ -326,6 +330,9 @@ Note the **angle** of the slope, not just its direction. A steep south-facing sl
 
 ---
 
+
+![close-up detail](/images/how-to-read-landscape-detail.png)
+
 ## Part V: Reading Frost
 
 Frost kills more gardens, orchards, and livelihoods than drought. Understanding where frost collects in a landscape is one of the highest-value pieces of landscape literacy you can acquire.
@@ -483,6 +490,9 @@ When you visit an unfamiliar piece of land, look for remnants of old settlement.
 If you find an old spring house — a small stone structure with a trough or basin inside, usually partially collapsed — you have found what may be the most valuable point on the property. Mark it. Test the water flow. A spring that has been running long enough for someone to build a stone house over it is likely a reliable, perennial water source.
 
 ---
+
+
+![the process in action](/images/how-to-read-landscape-process.png)
 
 ## Part VIII: The 10-Minute Landscape Reading Protocol
 
@@ -679,6 +689,9 @@ The valley across the middle of the property may channel wind from the west, cre
 **Old settlement evidence:** You notice a line of old, gnarled apple trees near the forest edge, roughly where you identified the prime building zone. Somebody already figured this out, probably a century ago. You find what might be a foundation depression nearby. They chose the same spot for the same reasons.
 
 ---
+
+
+![the finished result](/images/how-to-read-landscape-result.png)
 
 ## Part XI: The Deeper Practice
 

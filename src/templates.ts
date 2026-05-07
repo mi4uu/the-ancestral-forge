@@ -29,6 +29,8 @@ function head(titleOrMeta: string | SeoMeta) {
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-715YXLJX2J"></script>
+<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-715YXLJX2J');</script>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>${meta.title}</title>
 <meta name="description" content="${desc}"/>
@@ -81,6 +83,7 @@ ${ogImage ? `<meta property="og:image" content="${ogImage}"/>` : ""}
   .hero-grid { display: grid; grid-template-columns: 7fr 5fr; gap: 32px; padding-top: 32px; border-top: 1px solid ${P.ink}; }
   .hero-img-wrap { position: relative; border: 1px solid ${P.ink}; }
   .hero-img-wrap svg { display: block; width: 100%; height: 520px; }
+  .hero-img-wrap img { display: block; width: 100%; height: 520px; object-fit: cover; }
   .hero-stamp { position: absolute; top: 16px; left: 16px; padding: 4px 12px; font-size: 10px; letter-spacing: 0.3em; font-weight: 700; text-transform: uppercase; background: ${P.deep}; color: ${P.bg}; }
   .hero-plate { position: absolute; bottom: 0; left: 0; right: 0; padding: 8px 16px; font-size: 10px; letter-spacing: 0.25em; display: flex; justify-content: space-between; background: ${P.bg}; border-top: 1px solid ${P.ink}; color: ${P.muted}; }
   .hero-article { display: flex; flex-direction: column; }
@@ -115,10 +118,11 @@ ${ogImage ? `<meta property="og:image" content="${ogImage}"/>` : ""}
   .card { display: flex; flex-direction: column; padding: 0 28px; cursor: pointer; transition: background 200ms; }
   .card:hover { background: ${P.ink}06; }
   .card + .card { border-left: 1px solid ${P.ink}; }
-  .card-cat { font-size: 10px; letter-spacing: 0.32em; font-weight: 700; color: ${P.gold}; margin-bottom: 16px; }
+  .card-cat { display: flex; align-items: center; gap: 12px; font-size: 10px; letter-spacing: 0.32em; font-weight: 700; color: ${P.gold}; margin-bottom: 16px; }
   .card-img { position: relative; margin-bottom: 20px; border: 1px solid ${P.ink}; }
   .card-img svg { display: block; width: 100%; height: 220px; }
-  .card-tag { position: absolute; top: 8px; right: 8px; padding: 2px 8px; font-size: 9px; letter-spacing: 0.22em; background: ${P.bg}; border: 1px solid ${P.ink}; color: ${P.ink}; }
+  .card-img img { display: block; width: 100%; height: 220px; object-fit: cover; }
+  .card-tag { position: absolute; top: 12px; right: 12px; padding: 5px 12px; font-size: 10px; letter-spacing: 0.2em; font-weight: 700; background: ${P.bg}; border: 1.5px solid ${P.ink}; color: ${P.ink}; display: none; }
   .card h3 { font-family: ${FONT}; font-weight: 800; font-size: 28px; line-height: 1.05; margin-bottom: 12px; text-wrap: balance; }
   .card h3 a { text-decoration: none; }
   .card h3 a:hover { text-decoration: underline; }
@@ -133,14 +137,39 @@ ${ogImage ? `<meta property="og:image" content="${ogImage}"/>` : ""}
   .secondary-item + .secondary-item { border-left: 1px solid ${P.ink}; }
   .secondary-img { border-right: 1px solid ${P.ink}; }
   .secondary-img svg { display: block; width: 100%; height: 100%; min-height: 260px; }
+  .secondary-img img { display: block; width: 100%; height: 100%; min-height: 260px; object-fit: cover; }
   .secondary-text { padding: 28px; display: flex; flex-direction: column; }
-  .secondary-text .cat { font-size: 10px; letter-spacing: 0.3em; font-weight: 700; color: ${P.gold}; margin-bottom: 12px; }
+  .secondary-text .cat { display: flex; align-items: center; gap: 10px; font-size: 10px; letter-spacing: 0.3em; font-weight: 700; color: ${P.gold}; margin-bottom: 12px; }
   .secondary-text h3 { font-family: ${FONT}; font-weight: 800; font-size: 24px; line-height: 1.05; margin-bottom: 12px; text-wrap: balance; }
   .secondary-text h3 a { text-decoration: none; }
   .secondary-text h3 a:hover { text-decoration: underline; }
   .secondary-text p { font-size: 13px; line-height: 1.55; color: ${P.ink}CC; margin-bottom: 16px; }
   .secondary-text .byline { margin-top: auto; font-size: 11px; letter-spacing: 0.2em; color: ${P.muted}; }
   .secondary-text .byline strong { color: ${P.ink}; font-weight: 600; }
+
+  /* Access badges */
+  .badge-members { display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; font-size: 10px; letter-spacing: 0.18em; font-weight: 700; text-transform: uppercase; background: ${P.deep}; color: ${P.gold}; white-space: nowrap; vertical-align: middle; }
+  .badge-free { display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; font-size: 10px; letter-spacing: 0.18em; font-weight: 700; text-transform: uppercase; background: transparent; color: #5a7a5a; border: 1.5px solid #5a7a5a55; white-space: nowrap; vertical-align: middle; }
+
+  /* Archive grid */
+  .archive { padding: 64px 32px; border-bottom: 1px solid ${P.ink}; }
+  .archive-inner { max-width: 1500px; margin: 0 auto; }
+  .archive-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; }
+  .archive-item { display: flex; gap: 16px; padding: 20px 24px; border-bottom: 1px dashed ${P.ink}33; cursor: pointer; transition: background 200ms; }
+  .archive-item:hover { background: ${P.ink}06; }
+  .archive-item:nth-child(-n+4) { border-top: 1px solid ${P.ink}; }
+  .archive-item:nth-child(4n+1) { border-right: 1px solid ${P.ink}22; }
+  .archive-item:nth-child(4n+2) { border-right: 1px solid ${P.ink}22; }
+  .archive-item:nth-child(4n+3) { border-right: 1px solid ${P.ink}22; }
+  .archive-thumb { flex-shrink: 0; width: 80px; height: 80px; border: 1px solid ${P.ink}33; overflow: hidden; }
+  .archive-thumb img { width: 100%; height: 100%; object-fit: cover; }
+  .archive-thumb svg { width: 100%; height: 100%; }
+  .archive-text { display: flex; flex-direction: column; min-width: 0; }
+  .archive-text .cat { display: flex; align-items: center; gap: 8px; font-size: 9px; letter-spacing: 0.3em; font-weight: 700; color: ${P.gold}; margin-bottom: 4px; }
+  .archive-text h4 { font-family: ${FONT}; font-weight: 700; font-size: 15px; line-height: 1.15; margin-bottom: 4px; }
+  .archive-text h4 a { text-decoration: none; }
+  .archive-text h4 a:hover { text-decoration: underline; }
+  .archive-text .meta { font-size: 10px; letter-spacing: 0.18em; color: ${P.muted}; margin-top: auto; }
 
   /* Newsletter */
   .newsletter { position: relative; padding: 96px 32px; overflow: hidden; background: ${P.deep}; color: ${P.bg}; text-align: center; }
@@ -179,13 +208,20 @@ ${ogImage ? `<meta property="og:image" content="${ogImage}"/>` : ""}
   .article-page > h1 { font-family: ${FONT}; font-weight: 800; font-size: clamp(36px, 5vw, 56px); line-height: 1.05; margin-bottom: 16px; text-wrap: balance; }
   .article-byline { font-size: 13px; color: ${P.muted}; margin-bottom: 32px; padding-bottom: 32px; border-bottom: 1px solid ${P.ink}33; }
   .article-byline strong { color: ${P.ink}; }
-  .article-hero-img { margin-bottom: 40px; border: 1px solid ${P.ink}; }
+  .article-hero-img { margin-bottom: 40px; border: 1px solid ${P.ink}; overflow: hidden; }
   .article-hero-img svg { display: block; width: 100%; height: 400px; }
+  .article-hero-img img { display: block; width: 100%; height: auto; }
+  .article-page img { display: block; max-width: 100%; height: auto; margin: 32px 0; border: 1px solid ${P.ink}33; }
   .article-h2 { font-family: ${FONT}; font-weight: 800; font-size: 32px; line-height: 1.1; margin: 48px 0 16px; color: ${P.ink}; }
   .article-h3 { font-family: ${FONT}; font-weight: 700; font-size: 24px; line-height: 1.15; margin: 36px 0 12px; color: ${P.ink}; }
   .article-p { font-size: 17px; line-height: 1.7; margin-bottom: 20px; color: ${P.ink}; }
   .article-ol, .article-ul { margin: 16px 0 24px 24px; font-size: 16px; line-height: 1.7; }
   .article-li, .article-li-ul { margin-bottom: 8px; }
+  .article-table { width: 100%; border-collapse: collapse; margin: 24px 0 32px; font-size: 15px; line-height: 1.5; }
+  .article-table th { text-align: left; padding: 10px 14px; font-weight: 700; font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: ${P.muted}; border-bottom: 2px solid ${P.ink}; background: ${P.paper}; }
+  .article-table td { padding: 10px 14px; border-bottom: 1px solid ${P.ink}22; }
+  .article-table tr:hover td { background: ${P.paper}; }
+  .article-hr { border: none; border-top: 1px solid ${P.ink}33; margin: 40px 0; }
 
   /* Responsive */
   @media (max-width: 1024px) {
@@ -194,6 +230,11 @@ ${ogImage ? `<meta property="og:image" content="${ogImage}"/>` : ""}
     .card + .card { border-left: none; border-top: 1px solid ${P.ink}; padding-top: 28px; }
     .secondary-inner { grid-template-columns: 1fr; }
     .secondary-item + .secondary-item { border-left: none; border-top: 1px solid ${P.ink}; }
+    .archive-grid { grid-template-columns: repeat(2, 1fr); }
+    .archive-item:nth-child(4n+1),
+    .archive-item:nth-child(4n+2),
+    .archive-item:nth-child(4n+3) { border-right: none; }
+    .archive-item:nth-child(2n+1) { border-right: 1px solid ${P.ink}22; }
     .nav-links { display: none; }
     .nav-eyebrow .hide-mobile { display: none; }
     .footer-grid { grid-template-columns: 1fr 1fr; }
@@ -202,6 +243,8 @@ ${ogImage ? `<meta property="og:image" content="${ogImage}"/>` : ""}
     .hero, .transmissions, .secondary, .footer { padding-left: 16px; padding-right: 16px; }
     .nav-eyebrow, .nav-main { padding-left: 16px; padding-right: 16px; }
     .newsletter { padding-left: 16px; padding-right: 16px; }
+    .archive-grid { grid-template-columns: 1fr; }
+    .archive-item:nth-child(2n+1) { border-right: none; }
     .newsletter .form-row { flex-direction: column; }
     .newsletter .btn-sub { border-left: none; border-top: 1px solid ${P.deep}; }
     .secondary-item { grid-template-columns: 1fr; }
@@ -223,14 +266,24 @@ function newsletterRays(): string {
   return lines.join("");
 }
 
+function accessBadge(a: Article): string {
+  if (isArticleGated(a)) return `<span class="badge-members">🔒 Members</span>`;
+  return `<span class="badge-free">Free</span>`;
+}
+
+function articleImage(a: Article, alt?: string, eager = false): string {
+  if (a.heroImage) return `<img src="${a.heroImage}" alt="${alt || a.title}"${eager ? "" : ' loading="lazy"'}/>`;
+  return getIllustration(a.illustration);
+}
+
 function nav() {
   return `
 <header class="nav-header">
   <div class="nav-eyebrow">
-    <span>EST. ANNO MMXXIV  ·  VOL. III  ·  №  47</span>
-    <span class="hide-mobile">MONDAY  ·  4 MAY 2026  ·  WAXING GIBBOUS  ·  FROST WARN: NONE</span>
-    <span>SUBSCRIBERS: ${cfg.subscriberCountText}</span>
+    <span>EST. 2026</span>
+    <span>SUBSCRIBERS: <span id="sub-count">${cfg.subscriberCountText}</span></span>
   </div>
+  <script>(function(){fetch('/api/subscriber-count').then(function(r){return r.json()}).then(function(d){if(!d.display)return;['sub-count','sub-count-nl'].forEach(function(id){var el=document.getElementById(id);if(el)el.textContent=d.display;});}).catch(function(){});})()</script>
   <nav class="nav-main">
     <a href="/" class="nav-logo">
       <svg width="28" height="28" viewBox="0 0 40 40" fill="none" stroke="${P.ink}" stroke-width="1.6" stroke-linecap="round">
@@ -273,7 +326,7 @@ function footer() {
     <div class="footer-bottom">
       <span>©  ${new Date().getFullYear()}  ${cfg.name.toUpperCase()}.  RECLAIMING  THE  LOST  ARTS.</span>
       <div class="footer-bottom-links">
-        <a href="#">PRIVACY</a><a href="#">TERMS</a><a href="#">COLOPHON</a><a href="/rss">RSS</a>
+        <a href="/rss">RSS</a>
       </div>
     </div>
     <div class="footer-disclaimer">
@@ -281,7 +334,25 @@ function footer() {
       ${cfg.footer.legalDisclaimer}
     </div>
   </div>
-</footer>`;
+</footer>
+<div id="cookie-banner" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:9999;background:${P.deep};color:${P.bg};padding:16px 24px;font-size:13px;line-height:1.5;box-shadow:0 -2px 12px rgba(0,0,0,.3);">
+  <div style="max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap;">
+    <p style="margin:0;flex:1;min-width:280px;">This site uses cookies (Google Analytics) to understand how visitors use our content. By continuing to browse, you consent to cookies. <span style="color:${P.gold};">We use only analytics cookies.</span></p>
+    <div style="display:flex;gap:10px;flex-shrink:0;">
+      <button onclick="acceptCookies()" style="padding:8px 24px;background:${P.gold};color:${P.deep};border:none;font-size:12px;letter-spacing:0.15em;font-weight:700;text-transform:uppercase;cursor:pointer;">Accept</button>
+      <button onclick="declineCookies()" style="padding:8px 24px;background:transparent;color:${P.bg};border:1px solid ${P.bg}55;font-size:12px;letter-spacing:0.15em;font-weight:700;text-transform:uppercase;cursor:pointer;">Decline</button>
+    </div>
+  </div>
+</div>
+<script>
+(function(){
+  var consent=localStorage.getItem('cookie_consent');
+  if(consent===null){document.getElementById('cookie-banner').style.display='block';}
+  if(consent==='declined'){window['ga-disable-G-715YXLJX2J']=true;}
+})();
+function acceptCookies(){localStorage.setItem('cookie_consent','accepted');document.getElementById('cookie-banner').style.display='none';}
+function declineCookies(){localStorage.setItem('cookie_consent','declined');window['ga-disable-G-715YXLJX2J']=true;document.getElementById('cookie-banner').style.display='none';}
+</script>`;
 }
 
 function newsletter() {
@@ -299,7 +370,7 @@ function newsletter() {
       </div>
     </form>
     <div class="trust">
-      <span>✓  ${cfg.subscriberCountText}  READERS</span>
+      <span>✓  <span id="sub-count-nl">${cfg.subscriberCountText}</span>  READERS</span>
       <span style="opacity:0.4">|</span>
       <span>✓  ONE  EMAIL  PER  WEEK</span>
       <span style="opacity:0.4">|</span>
@@ -321,8 +392,10 @@ ${footer()}
 </body></html>`;
   }
   const featured = articles.find((a) => a.featured) || articles[0];
-  const grid = articles.filter((a) => !a.featured).slice(0, 3);
-  const secondary = articles.filter((a) => !a.featured).slice(3, 5);
+  const rest = articles.filter((a) => a !== featured);
+  const grid = rest.slice(0, 3);
+  const secondary = rest.slice(3, 5);
+  const archive = rest.slice(5);
 
   const highlightsList = (featured.highlights || [])
     .map((h, i) => `<li><span class="num">${String(i + 1).padStart(2, "0")}</span><span>${h}</span></li>`)
@@ -330,12 +403,11 @@ ${footer()}
 
   const cardHtml = grid
     .map(
-      (a, i) => `
+      (a) => `
     <article class="card">
-      <div class="card-cat">◆ ${a.category.replace(/\s+/g, "  ")}</div>
+      <div class="card-cat">◆ ${a.category.replace(/\s+/g, "  ")}  ${accessBadge(a)}</div>
       <div class="card-img">
-        ${getIllustration(a.illustration)}
-        <div class="card-tag">${a.tag}</div>
+        ${articleImage(a)}
       </div>
       <h3><a href="/articles/${a.slug}">${a.title}</a></h3>
       <p>${a.excerpt}</p>
@@ -352,11 +424,11 @@ ${footer()}
 
   const secondaryHtml = secondary
     .map(
-      (a, i) => `
+      (a) => `
     <div class="secondary-item">
-      <div class="secondary-img">${getIllustration(a.illustration)}</div>
+      <div class="secondary-img">${articleImage(a)}</div>
       <div class="secondary-text">
-        <div class="cat">◆  ${a.category}</div>
+        <div class="cat">◆  ${a.category}  ${accessBadge(a)}</div>
         <h3><a href="/articles/${a.slug}">${a.title}</a></h3>
         <p>${a.excerpt}</p>
         <div class="byline">BY  <strong>${a.author}</strong> <span style="color:${P.gold}">→</span></div>
@@ -373,9 +445,7 @@ ${nav()}
     <div class="hero-breadcrumb">
       <span>FRONT  PAGE</span>
       <span class="line"></span>
-      <span>ISSUE  №  47</span>
-      <span class="line"></span>
-      <span>WEEK  OF  IV  MAY  ANNO  MMXXVI</span>
+      <span>${articles.length}  DISPATCHES  PUBLISHED</span>
     </div>
     <h1>
       Hidden Facts.<br/>
@@ -384,18 +454,14 @@ ${nav()}
     </h1>
     <div class="hero-grid">
       <div class="hero-img-wrap">
-        ${getIllustration(featured.illustration)}
+        ${articleImage(featured, undefined, true)}
         <div class="hero-stamp">Featured  ·  Long  Read</div>
-        <div class="hero-plate">
-          <span>PLATE IV  ·  HAND-DRAWN  ·  E. WHITTIER</span>
-          <span>ANGELICA  KEISKEI  KOIDZUMI</span>
-        </div>
       </div>
       <div class="hero-article">
         <div class="hero-cat">
           <span class="hero-cat-label">◆  ${featured.category}</span>
           <span class="line"></span>
-          <span class="hero-cat-read">${featured.readTime} MIN READ</span>
+          <span class="hero-cat-read">${accessBadge(featured)}  ·  ${featured.readTime} MIN READ</span>
         </div>
         <h2>${featured.title.replace(/: (.+)$/, ': <em>$1</em>')}</h2>
         <p class="hero-excerpt">
@@ -425,13 +491,35 @@ ${nav()}
         <h2>Latest Transmissions</h2>
         <p class="sub">Field reports filed this week from contributors in seven countries.</p>
       </div>
-      <a href="#" class="view-all">VIEW  ALL →</a>
+      <a href="/archive" class="view-all">VIEW  ALL →</a>
     </div>
     <div class="cards-grid">${cardHtml}</div>
   </div>
 </section>
 
 ${secondary.length ? `<section class="secondary"><div class="secondary-inner">${secondaryHtml}</div></section>` : ""}
+
+${archive.length ? `<section class="archive">
+  <div class="archive-inner">
+    <div class="section-head">
+      <div>
+        <div class="section-tag"><span>◆</span><span>SECTION  IV</span><span>◆</span></div>
+        <h2>From the Archive</h2>
+        <p class="sub">Every dispatch we've published — the full library.</p>
+      </div>
+    </div>
+    <div class="archive-grid">
+      ${archive.map((a) => `<a href="/articles/${a.slug}" class="archive-item" style="text-decoration:none;">
+        <div class="archive-thumb">${articleImage(a)}</div>
+        <div class="archive-text">
+          <div class="cat">◆  ${a.category.toUpperCase()}  ${accessBadge(a)}</div>
+          <h4>${a.title}</h4>
+          <div class="meta">${a.readTime} MIN  ·  ${a.date}</div>
+        </div>
+      </a>`).join("")}
+    </div>
+  </div>
+</section>` : ""}
 
 ${newsletter()}
 ${footer()}
@@ -465,9 +553,9 @@ function renderComments(slug: string, comments: Comment[], user: UserContext): s
       <button type="submit" style="margin-top:8px;padding:10px 20px;font-size:12px;letter-spacing:0.2em;font-weight:700;text-transform:uppercase;background:${P.ink};color:${P.bg};border:none;cursor:pointer;">Post Comment</button>
     </form>`;
   } else if (user.isLoggedIn) {
-    form = `<p style="margin-top:24px;padding:16px;background:${P.paper};border:1px solid ${P.ink}33;font-size:14px;color:${P.muted};">Commenting is a patron benefit. <a href="https://www.patreon.com" style="color:${P.gold};font-weight:600;">Become a patron</a> to join the conversation.</p>`;
+    form = `<p style="margin-top:24px;padding:16px;background:${P.paper};border:1px solid ${P.ink}33;font-size:14px;color:${P.muted};">Commenting is a member benefit. <a href="https://buymeacoffee.com/TheAncestralForge" style="color:${P.gold};font-weight:600;">Become a member</a> to join the conversation.</p>`;
   } else {
-    form = `<p style="margin-top:24px;padding:16px;background:${P.paper};border:1px solid ${P.ink}33;font-size:14px;color:${P.muted};"><a href="/auth/login" style="color:${P.gold};font-weight:600;">Log in via Patreon</a> to comment.</p>`;
+    form = `<p style="margin-top:24px;padding:16px;background:${P.paper};border:1px solid ${P.ink}33;font-size:14px;color:${P.muted};"><a href="/auth/login" style="color:${P.gold};font-weight:600;">Log in</a> to comment.</p>`;
   }
 
   return `<section id="comments" style="max-width:780px;margin:0 auto;padding:0 32px 64px;">
@@ -504,7 +592,9 @@ ${nav()}
     By <strong>${article.author}</strong>${article.authorRole ? ` · ${article.authorRole}` : ""}
   </div>
   <div class="article-hero-img">
-    ${getIllustration(article.illustration)}
+    ${article.heroImage
+      ? `<img src="${article.heroImage}" alt="${article.title}" style="display:block;width:100%;height:auto;"/>`
+      : getIllustration(article.illustration)}
   </div>
   ${bodyContent}
 </article>
@@ -595,5 +685,6 @@ ${nav()}
   <a href="/" class="btn-dispatch">Return to the Front Page</a>
 </div>
 ${footer()}
-</body></html>`;
+</body>
+</html>`;
 }

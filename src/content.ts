@@ -11,6 +11,7 @@ export interface Article {
   readTime: number;
   tag: string;
   illustration: string;
+  heroImage?: string;
   date: string;
   excerpt: string;
   featured: boolean;
@@ -122,8 +123,28 @@ export function markdownToHtml(md: string): string {
       continue;
     }
 
-    // Unordered list
+    // Horizontal rule
+    if (/^(-{3,}|\*{3,}|_{3,})$/.test(trimmed)) {
+      output.push('<hr class="article-hr"/>');
+      continue;
+    }
+
+    // Table
     const lines = trimmed.split("\n");
+    if (lines.length >= 2 && lines[0].includes("|") && /^\|?\s*-+/.test(lines[1])) {
+      const parseRow = (row: string) =>
+        row.replace(/^\|/, "").replace(/\|$/, "").split("|").map((c) => c.trim());
+      const headers = parseRow(lines[0]);
+      const bodyRows = lines.slice(2).filter((l) => l.includes("|"));
+      const thead = `<thead><tr>${headers.map((h) => `<th>${h}</th>`).join("")}</tr></thead>`;
+      const tbody = bodyRows.length
+        ? `<tbody>${bodyRows.map((r) => `<tr>${parseRow(r).map((c) => `<td>${c}</td>`).join("")}</tr>`).join("")}</tbody>`
+        : "";
+      output.push(`<table class="article-table">${thead}${tbody}</table>`);
+      continue;
+    }
+
+    // Unordered list
     if (lines.every((l) => /^- /.test(l))) {
       const items = lines.map((l) => `<li class="article-li-ul">${l.slice(2).trim()}</li>`).join("\n");
       output.push(`<ul class="article-ul">\n${items}\n</ul>`);
@@ -196,6 +217,7 @@ export async function loadArticles(): Promise<Article[]> {
         readTime: meta.readTime || 5,
         tag: meta.tag || "",
         illustration: meta.illustration || "",
+        heroImage: meta.heroImage || undefined,
         date: meta.date || "",
         excerpt: meta.excerpt || "",
         featured: meta.featured === true,

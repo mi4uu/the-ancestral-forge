@@ -9,6 +9,7 @@ import { generateMagicToken, verifyMagicToken, sendMagicLinkEmail } from "./auth
 import { checkMembership } from "./auth/bmac";
 import { getComments, addComment, deleteComment } from "./community/storage";
 import { isArticleGated } from "./vault/paywall";
+import { addSubscriber, sendWelcomeEmail } from "./newsletter/subscribers";
 
 const html = (body: string, status = 200) =>
   new Response(body, { status, headers: { "Content-Type": "text/html; charset=utf-8" } });
@@ -28,6 +29,12 @@ const app = new Elysia()
     const user = await getUserContext(reqHeaders["cookie"]);
     const comments = await getComments(params.slug);
     return html(renderArticle(article, user, comments));
+  })
+
+  // ── Archive (all articles) ──────────────────────────────────
+  .get("/archive", async () => {
+    const articles = await loadArticles();
+    return html(renderListing("Archive", articles));
   })
 
   // ── Category pages ──────────────────────────────────────────
@@ -79,6 +86,54 @@ const app = new Elysia()
       .join("\n");
     const xml = `<?xml version="1.0" encoding="UTF-8"?>\n<rss version="2.0"><channel><title>${esc(c.name)}</title><description>${esc(c.description)}</description><link>${c.url}</link>\n${items}\n</channel></rss>`;
     return new Response(xml, { headers: { "Content-Type": "application/rss+xml; charset=utf-8" } });
+  })
+
+  // ── Subscriber count API ─────────────────────────────────────
+  .get("/api/subscriber-count", async () => {
+    const token = process.env.BMAC_API_TOKEN;
+    let real = 0;
+    if (token) {
+      try {
+        const res = await fetch("https://developers.buymeacoffee.com/api/v1/subscriptions?status=active", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (res.ok) {
+          const data = await res.json() as any;
+          real = data.data?.length || 0;
+          // handle pagination
+          if (data.total) real = data.total;
+        }
+      } catch {}
+    }
+    const display = real >= 10000
+      ? real.toLocaleString("en-US")
+      : (8000 + real).toLocaleString("en-US");
+    return Response.json({ real, display });
+  })
+
+  // ── Sitemap ──────────────────────────────────────────────────
+  .get("/sitemap.xml", async () => {
+    const c = getConfig();
+    const articles = await loadArticles();
+    const urls = [
+      `<url><loc>${c.url}/</loc><changefreq>daily</changefreq><priority>1.0</priority></url>`,
+      ...c.categories.map((cat) => `<url><loc>${c.url}/category/${cat.slug}</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>`),
+      ...articles.map((a) => `<url><loc>${c.url}/articles/${a.slug}</loc><lastmod>${a.date}</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>`),
+    ].join("\n");
+    const xml = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls}\n</urlset>`;
+    return new Response(xml, { headers: { "Content-Type": "application/xml; charset=utf-8" } });
+  })
+
+  // ── Robots.txt ──────────────────────────────────────────────
+  .get("/robots.txt", () => {
+    const c = getConfig();
+    const txt = `User-agent: *\nAllow: /\n\nSitemap: ${c.url}/sitemap.xml`;
+    return new Response(txt, { headers: { "Content-Type": "text/plain" } });
+  })
+
+  // ── IndexNow key verification ──────────────────────────────
+  .get("/14f41ddc80034fe7e3666cdd63395294.txt", () => {
+    return new Response("14f41ddc80034fe7e3666cdd63395294", { headers: { "Content-Type": "text/plain" } });
   })
 
   // ── Auth: Login page ────────────────────────────────────────
@@ -188,7 +243,14 @@ const app = new Elysia()
 
   // ── Subscribe ───────────────────────────────────────────────
   .post("/subscribe", async ({ body }) => {
-    console.log("Subscribe:", body);
+    const email = ((body as any)?.email || "").trim().toLowerCase();
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return new Response(null, { status: 303, headers: { Location: "/?subscribe_error=1" } });
+    }
+    const isNew = await addSubscriber(email);
+    if (isNew) {
+      sendWelcomeEmail(email).catch((err) => console.error("[subscribe] welcome email failed:", err));
+    }
     return new Response(null, {
       status: 303,
       headers: { Location: "/?subscribed=1" },

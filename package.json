@@ -4,7 +4,8 @@
   "license": "AGPL-3.0-or-later",
   "scripts": {
     "dev": "bun run --watch src/server.ts",
-    "start": "bun run src/server.ts"
+    "start": "bun run src/server.ts",
+    "deploy": "rsync -avz --exclude=node_modules --exclude=.git --exclude=data --exclude=.env -e 'ssh -p 10135' ./ root@leszek135.mikrus.xyz:/root/apps/the-ancestral-forge/ && ssh root@leszek135.mikrus.xyz -p 10135 'cd /root/apps/the-ancestral-forge && /root/.bun/bin/bun install && systemctl restart the-ancestral-forge'"
   },
   "dependencies": {
     "elysia": "^1.2.25",

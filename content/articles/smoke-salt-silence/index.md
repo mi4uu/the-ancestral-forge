@@ -8,6 +8,7 @@ date: 2026-05-01
 readTime: 38
 excerpt: "Your refrigerator is 100 years old. The human species is 300,000 years old. For 299,900 of those years, we preserved meat with three things: smoke, salt, and patience. Here are the three methods that kept armies marching and families fed through winter — with complete step-by-step instructions you can follow this weekend."
 illustration: herb-bundle
+heroImage: /images/smoke-salt-silence-hero.png
 featured: false
 free: false
 ---
@@ -73,6 +74,9 @@ Three ways:
 Our three methods represent all three strategies. That is not a coincidence. It is why I chose them.
 
 ---
+
+
+![atmospheric scene](/images/smoke-salt-silence-scene.png)
 
 ## Part III: The Chemistry of Smoke, Salt, and Acid
 
@@ -229,6 +233,9 @@ Once dried to your preference:
 **Yield:** 2 kg of raw meat produces approximately 800g-1kg of finished biltong (60-50% weight loss from moisture). This is roughly 10-12 servings of protein-dense, shelf-stable food from twenty dollars worth of beef.
 
 ---
+
+
+![close-up detail](/images/smoke-salt-silence-detail.png)
 
 ## Part V: Confit -- The Fat Seal of Gascony
 
@@ -483,6 +490,9 @@ For field use: wrap in cloth or paper and carry in a hip pouch, saddlebag, or pa
 
 ---
 
+
+![the process in action](/images/smoke-salt-silence-process.png)
+
 ## Part VII: The Nitrate Question -- What They Do Not Want You to Know
 
 No article on meat preservation would be complete without addressing the compound that makes the food safety establishment simultaneously grateful and anxious: nitrite.
@@ -594,6 +604,9 @@ If you follow these rules, you will be as safe as your great-grandparents were -
 8. **Wash your hands. Clean your tools. Sterilize your storage vessels.** The fewer bacteria you introduce at the beginning, the fewer you have to suppress throughout the process. This is the easiest hurdle to maintain and the one most often neglected.
 
 ---
+
+
+![the finished result](/images/smoke-salt-silence-result.png)
 
 ## Part IX: Building a Preservation Pantry
 

@@ -8,6 +8,7 @@ date: 2026-05-03
 readTime: 42
 excerpt: "Your great-grandmother ate liver three times a week. She didn't know about BCMO1 polymorphisms or methylcobalamin — she just knew it kept her family alive. Here's why 45% of the population cannot get adequate vitamin A from plants alone, and the forgotten protocol that delivers more bioavailable nutrients than any supplement shelf."
 illustration: mortar
+heroImage: /images/organ-protocol-hero.png
 featured: false
 free: false
 ---
@@ -96,6 +97,9 @@ Now consider what most people eat instead: chicken breast. Per 100 grams, chicke
 The modern diet has performed an extraordinary inversion. We eat the least nutritious part of the animal — skeletal muscle — in enormous quantities, and we discard or render into pet food the most nutritious parts. Then we attempt to compensate for the resulting deficiencies with synthetic supplements manufactured in factories. The absurdity of this arrangement becomes clear only when you see the numbers side by side.
 
 ---
+
+
+![atmospheric scene](/images/organ-protocol-scene.png)
 
 ## IV. The BCMO1 Problem: Why Plants Cannot Save You
 
@@ -254,6 +258,9 @@ When you take cyanocobalamin, your body must first remove the cyanide group, the
 Liver bypasses the entire conversion problem. The methylcobalamin and adenosylcobalamin are already there, already in the form the methylation cycle requires, already embedded in the protein matrix that facilitates their absorption.
 
 ---
+
+
+![close-up detail](/images/organ-protocol-detail.png)
 
 ## VIII. The Vitamin A Safety Question: Dosing Without Fear
 
@@ -433,6 +440,9 @@ The supplement industry exists, in large part, to compensate for the organ-shape
 
 ---
 
+
+![the process in action](/images/organ-protocol-process.png)
+
 ## XII. The Ancestral Precedent: What Weston Price Actually Found
 
 It is worth returning to Weston A. Price, because his work is often cited in broad strokes but rarely examined in detail.
@@ -551,6 +561,9 @@ One to two servings of liver per week, totaling 100-200 grams, produces an avera
 They are. They are also more expensive, less effective, and nutritionally incomplete. Convenience is a valid consideration. But a jar of frozen liver pills in the freezer, swallowed with water in the morning, takes no more time than opening a supplement bottle. And a batch of liver pate, made on Sunday, lasts the week in the refrigerator.
 
 ---
+
+
+![the finished result](/images/organ-protocol-result.png)
 
 ## XVI. The Forgotten Nutrient Matrix
 
