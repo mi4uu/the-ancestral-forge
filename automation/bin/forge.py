@@ -349,6 +349,9 @@ def cmd_outline(a):
 def split_article(text):
     m = re.match(r"^---\n([\s\S]*?)\n---\n([\s\S]*)$", text.strip() + "\n")
     if not m:
+        m = re.match(r"^---\n((?:[^\n]+\n)+)\n([\s\S]*)$", text.strip() + "\n")
+        if m:
+            return m.group(1).strip(), m.group(2).strip()
         raise RuntimeError("draft has no frontmatter")
     return m.group(1), m.group(2).strip()
 
