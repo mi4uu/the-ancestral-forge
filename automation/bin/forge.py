@@ -470,6 +470,8 @@ def lint(st, text):
     leak = re.search(r"(the sources (here|cited|in this|for this)|cited (guidance|sources)|this article's sources|the dossier|do(es)? not verify|don't give (a )?(guidance|recipe|schedule)|sources? (do|does)(n't| not) (give|say|cover|establish))", low)
     if leak:
         hard.append(f"internal research talk leaked into the copy ('{leak.group(0)}'): delete it, or state the practice plainly without mentioning sources")
+    if re.search(r"\[\d+\]", body.split("\n## Sources")[0]):
+        hard.append("bracket citation numbers like [3] appear in the text: delete them and name the source in the sentence instead")
     for w in BANNED:
         if re.search(rf"\b{re.escape(w)}\b", low):
             hard.append(f"banned word: {w}")
