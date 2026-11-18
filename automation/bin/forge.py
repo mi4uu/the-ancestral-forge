@@ -414,7 +414,7 @@ def cmd_outline(a):
 def split_article(text):
     m = re.match(r"^---\n([\s\S]*?)\n---\n([\s\S]*)$", text.strip() + "\n")
     if not m:
-        m = re.match(r"^---\n((?:[^\n]+\n)+)\n([\s\S]*)$", text.strip() + "\n")
+        m = re.match(r"^---\n+((?:[^\n]+\n)+)\n([\s\S]*)$", text.strip() + "\n")
         if m:
             return m.group(1).strip(), m.group(2).strip()
         raise RuntimeError("draft has no frontmatter")
@@ -525,12 +525,18 @@ def cmd_draft(a):
         prompt = fill((PROMPTS / "draft.md").read_text(), st, OUTLINE=(d / "outline.md").read_text(), DOSSIER=(d / "research.md").read_text())
         text = agent(a.run, "draft", "redaktor", prompt, timeout=900)
         article, wc, srcs = normalise(a.run, text)
-        if wc < 1250 or wc > 2050:
-            direction = "too short: expand it to about 1,600 words by adding concrete detail from the dossier" if wc < 1250 else "too long: cut it to about 1,700 words"
-            retry = (f"Your draft is {wc} words, {direction}. Keep everything else. Reply with the complete index.md only.\n\n"
+        for n in (2, 3):
+            if 1250 <= wc <= 2050:
+                break
+            direction = (f"too short: add about {1650 - wc} words of concrete, useful detail from the dossier (a new section or fuller sections), do not pad"
+                         if wc < 1250 else "too long: cut it to about 1,700 words")
+            retry = (f"Your draft is {wc} words, {direction}. Keep everything else. Reply with the complete index.md only, with the closing --- line of the frontmatter.\n\n"
                      f"## Current draft\n{article}\n\n## Dossier\n{(d / 'research.md').read_text()}")
-            text = agent(a.run, "draft2", "redaktor", retry, timeout=900)
-            article, wc, srcs = normalise(a.run, text)
+            try:
+                text = agent(a.run, f"draft{n}", "redaktor", retry, timeout=900)
+                article, wc, srcs = normalise(a.run, text)
+            except RuntimeError:
+                break
         if wc < 700 or wc > 2800:
             raise RuntimeError(f"draft length {wc} words is outside 700-2800")
         if len(srcs) < 3:
