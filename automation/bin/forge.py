@@ -518,7 +518,7 @@ def cmd_review2(a):
             return {"verdict": st.get("verdict1"), "skipped": True}
         v = do_review(a.run, 2)
         if v["verdict"] == "revise":
-            v["verdict"] = "reject" if v["issues"] and lint(st, (d / "draft.md").read_text())[0] else "pass"
+            v["verdict"] = "reject" if v["issues"] and lint(st, (Path(a.run) / "draft.md").read_text())[0] else "pass"
         if v["verdict"] != "pass":
             fail(a.run, f"still {v['verdict']} after one revision: " + "; ".join(v["issues"][:3]))
         return {"verdict": "pass"}
