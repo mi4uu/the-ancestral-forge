@@ -2,8 +2,8 @@
   "slug": "nettle-patch-to-plate",
   "engine": "lobster",
   "date": "2026-11-18",
-  "status": "failed",
-  "claimedAt": "2026-11-18T04:42:48+01:00",
-  "run": "20261118-044247-lobster",
-  "reason": "step research: research found fewer than 3 sources"
+  "status": "claimed",
+  "claimedAt": "2026-11-18T04:48:44+01:00",
+  "run": "20261118-044842-lobster",
+  "attempts": 2
 }
