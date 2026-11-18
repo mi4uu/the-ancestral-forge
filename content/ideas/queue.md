@@ -247,3 +247,119 @@ Each topic is a block. Order is priority. Claimed topics live in claims/<slug>.j
   safety: none
   title: Soil texture jar test
   angle: Doing a soil jar test, reading the layers, what to do with the result
+
+## Added 2026-11-18 (hooks inspired by forgotten-knowledge channels; the facts are checked by research)
+
+- slug: cattail-supermarket-of-the-swamp
+  category: the-living-pantry
+  safety: toxic
+  title: Cattail supermarket of the swamp
+  angle: Cattail shoots, pollen and rhizome flour: what the yield figures really are, historical use, and the toxic lookalikes (iris) and water contamination. Hook: how much starch a cattail stand really gives per acre
+
+- slug: jujube-the-apple-that-dries-into-a-date
+  category: the-living-pantry
+  safety: none
+  title: Jujube the apple that dries into a date
+  angle: Jujube (Ziziphus jujuba): taste, drying, cold hardiness, how long trees live and bear, where to grow it
+
+- slug: pawpaw-americas-forgotten-custard-fruit
+  category: the-living-pantry
+  safety: none
+  title: Pawpaw americas forgotten custard fruit
+  angle: Pawpaw (Asimina triloba): native range, the fruit, why it never reached shops (shelf life), growing it, the historical record
+
+- slug: hickory-and-black-walnut-yard-nuts
+  category: the-living-pantry
+  safety: food
+  title: Hickory and black walnut yard nuts
+  angle: Foraging and processing yard nuts: hickory, black walnut, hulling, curing, storing, mould and aflatoxin cautions
+
+- slug: purslane-the-weed-with-omega-3
+  category: the-living-pantry
+  safety: toxic
+  title: Purslane the weed with omega 3
+  angle: Purslane as food: what research says about its omega-3 and oxalate content, identification, the spurge lookalike
+
+- slug: ground-cherries-the-husk-tomato
+  category: the-living-pantry
+  safety: none
+  title: Ground cherries the husk tomato
+  angle: Ground cherries (Physalis): growing, husk-ripening, storing in the husk, why they fell out of catalogues; green fruit and plant toxicity
+
+- slug: kvass-and-switchel-old-farm-drinks
+  category: the-living-pantry
+  safety: food
+  title: Kvass and switchel old farm drinks
+  angle: Kvass, switchel and other old farm drinks: history, how they are made, what fermentation does, food safety and alcohol content
+
+- slug: food-that-keeps-six-months-without-power
+  category: the-living-pantry
+  safety: none
+  title: Food that keeps six months without power
+  angle: Crops and methods that kept farm families fed through winter before refrigeration: roots, squash, onions, apples, cabbages and the storage conditions each needs
+
+- slug: winter-greens-under-snow
+  category: the-living-pantry
+  safety: none
+  title: Winter greens under snow
+  angle: Cold-hardy greens (mache, kale, claytonia, spinach) and how low tunnels and cold frames keep them going; what the extension trials show
+
+- slug: sea-buckthorn-and-haskap-cold-hardy-berries
+  category: the-living-pantry
+  safety: none
+  title: Sea buckthorn and haskap cold hardy berries
+  angle: Haskap and sea buckthorn: hardiness, what they taste like, growing needs, fruit nutrition from reliable sources
+
+- slug: why-gooseberries-and-currants-were-banned
+  category: the-living-pantry
+  safety: none
+  title: Why gooseberries and currants were banned
+  angle: The early twentieth century US restrictions on growing Ribes because of white pine blister rust: what happened, when the federal ban ended and what it means for growing them now (verify every date)
+
+- slug: dandelion-roots-and-greens-from-coffee-to-salad
+  category: the-apothecary
+  safety: herbal
+  title: Dandelion roots and greens from coffee to salad
+  angle: Dandelion as food: greens, roasted root drink, flowers, the history, safe foraging, what evidence exists, who should be careful
+
+- slug: chickweed-the-winter-salad
+  category: the-apothecary
+  safety: toxic
+  title: Chickweed the winter salad
+  angle: Common chickweed as a winter edible: identification, lookalikes such as scarlet pimpernel and spurge, culinary use, cautions
+
+- slug: mullein-from-roadside-to-tea
+  category: the-apothecary
+  safety: herbal
+  title: Mullein from roadside to tea
+  angle: Mullein (Verbascum): identification, traditional use as recorded in old herbals, what modern sources say, straining out the hairs, cautions
+
+- slug: feverfew-the-garden-daisy-with-a-long-history
+  category: the-apothecary
+  safety: herbal
+  title: Feverfew the garden daisy with a long history
+  angle: Feverfew: history in old herbals, what clinical evidence is mixed or limited, who should avoid it (pregnancy), growing it
+
+- slug: passionflower-and-skullcap-tea-garden-plants
+  category: the-apothecary
+  safety: herbal
+  title: Passionflower and skullcap tea garden plants
+  angle: Two traditional calming-tea plants: what they are, what research does and does not show, cautions and interactions, growing them (no dosing)
+
+- slug: the-usda-farmers-bulletins-forgotten-how-to-library
+  category: field-notes
+  safety: none
+  title: The usda farmers bulletins forgotten how to library
+  angle: The USDA Farmers' Bulletins: a century of free practical guides, how to find them on archive.org and HathiTrust, which ones still hold up, which do not
+
+- slug: multiflora-rose-the-hedge-the-government-planted
+  category: field-notes
+  safety: none
+  title: Multiflora rose the hedge the government planted
+  angle: How multiflora rose was promoted for hedgerows and erosion control, why it became an invasive weed, and what that teaches about introduced plants (verify the history)
+
+- slug: forgotten-cold-storage-springhouses-and-zeer-pots
+  category: the-forge
+  safety: none
+  title: Forgotten cold storage springhouses and zeer pots
+  angle: Springhouses, evaporative zeer pots and cold-water cooling: how they work, temperatures achieved, food safety limits

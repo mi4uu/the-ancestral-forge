@@ -8,7 +8,7 @@ date: 2026-11-18
 readTime: 6
 excerpt: "Grow lemon balm, mint and chamomile for a small home tea garden, then harvest, dry and store the herbs with care."
 illustration: herb-bundle
-heroImage: /images/lemon-balm-and-mint-tea-garden-hero.png
+heroImage: /images/lemon-balm-and-mint-tea-garden-hero.webp
 featured: false
 free: true
 sources:

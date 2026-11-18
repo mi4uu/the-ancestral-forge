@@ -8,7 +8,7 @@ date: 2026-11-18
 readTime: 5
 excerpt: "Safe foraging starts with positive identification, a careful check of the site, and permission to collect. Learn what these checks can and cannot tell you."
 illustration: herb-bundle
-heroImage: /images/wild-foraging-ground-rules-hero.png
+heroImage: /images/wild-foraging-ground-rules-hero.webp
 featured: false
 free: true
 sources:

@@ -29,12 +29,11 @@ SSH_IMG = ["ssh", "-F", "/dev/null", "-i", os.path.expanduser("~/.ssh/forge_img"
 REVIEW_MODEL = os.environ.get("FORGE_REVIEW_MODEL", "claude-cli/claude-sonnet-5-5")
 REVISE_MODEL = os.environ.get("FORGE_REVISE_MODEL", "openai-codex/gpt-5.5")
 
-PEOPLE = {
-    "the-apothecary": ("Silas Whitford", "SR. BOTANICAL CORRESPONDENT", "herb-bundle"),
-    "the-living-pantry": ("M. Calder", "FERMENTATION CORRESPONDENT", "ferment-jar"),
-    "the-forge": ("J. Brackish", "SURVIVAL ENGINEERING CORRESPONDENT", "ice-house"),
-    "field-notes": ("R. Halloway", "FIELD CORRESPONDENT", "herb-bundle"),
-}
+ILLUSTRATION = {"the-apothecary": "herb-bundle", "the-living-pantry": "ferment-jar", "the-forge": "ice-house", "field-notes": "herb-bundle"}
+PERSONAS = AUTO / "personas"
+PERSONA_OF_ENGINE = {"lobster": "silas-whitford", "nika": "r-halloway", "local": "e-whittier"}
+LOCAL_URL = os.environ.get("FORGE_LOCAL_URL", "http://salonpc.tail4ce15.ts.net:8095")
+LOCAL_MODEL = os.environ.get("FORGE_LOCAL_MODEL", "ornith")
 FALLBACK_HERO = {
     "the-apothecary": "/images/field-medic-kit-hero.png",
     "the-living-pantry": "/images/4am-sourdough-hero.png",
@@ -113,7 +112,7 @@ def fail(run, reason, release=True):
 def log_run(st):
     LOGS.mkdir(exist_ok=True)
     with open(LOGS / "runs.jsonl", "a") as f:
-        f.write(json.dumps({k: st.get(k) for k in ("run_id", "engine", "slug", "status", "reason", "image", "steps", "date")}) + "\n")
+        f.write(json.dumps({k: st.get(k) for k in ("run_id", "engine", "slug", "author", "free", "status", "reason", "image", "steps", "date")}) + "\n")
 
 
 # ---------------------------------------------------------------- git
@@ -224,6 +223,11 @@ def cmd_pick(a):
     @locked
     def go():
         st = load(a.run)
+        if st["engine"] == "local":
+            try:
+                local_call("/v1/models", timeout=20)
+            except Exception as e:
+                fail(a.run, f"local engine: salonpc llama-swap is not reachable ({str(e)[:80]}); no cloud fallback by design", release=False)
         for attempt in range(6):
             git_reset_to_origin()
             CLAIMS.mkdir(parents=True, exist_ok=True)
@@ -276,9 +280,9 @@ def cmd_pick(a):
             time.sleep(1 + random.random() * 3)
         else:
             raise RuntimeError("could not claim a topic after 6 attempts (push races)")
-        pe = PEOPLE[chosen["category"]]
+        pn, pr, _ = load_persona(st["engine"])
         st.update(slug=chosen["slug"], title=chosen["title"], category=chosen["category"], angle=chosen["angle"],
-                  safety=chosen.get("safety", "none"), author=pe[0], author_role=pe[1], illustration=pe[2])
+                  safety=chosen.get("safety", "none"), author=pn, author_role=pr, illustration=ILLUSTRATION[chosen["category"]])
         save(a.run, st)
         return {"slug": st["slug"], "title": st["title"], "category": st["category"], "engine": st["engine"]}
 
@@ -287,10 +291,48 @@ def cmd_pick(a):
 
 # ---------------------------------------------------------------- agents
 
+def load_persona(engine):
+    txt = (PERSONAS / f"{PERSONA_OF_ENGINE[engine]}.md").read_text()
+    meta = dict(re.findall(r"^(name|role):\s*(.+)$", txt, re.M))
+    return meta["name"], meta["role"], txt
+
+
+def local_key():
+    for line in (Path.home() / ".openclaw" / ".env").read_text().splitlines():
+        if line.startswith("LLAMA_SWAP_KEY="):
+            return line.split("=", 1)[1].strip().strip('"').strip("'")
+    raise RuntimeError("LLAMA_SWAP_KEY not found")
+
+
+def local_call(path, payload=None, timeout=60, method=None):
+    req = urllib.request.Request(LOCAL_URL + path, data=json.dumps(payload).encode() if payload is not None else None,
+                                 method=method, headers={"Authorization": "Bearer " + local_key(), "Content-Type": "application/json"})
+    with urllib.request.urlopen(req, timeout=timeout) as r:
+        return json.loads(r.read().decode() or "{}")
+
+
+def local_chat(run, step, message, timeout=900):
+    system = (AUTO / "agents" / "redaktor-AGENTS.md").read_text()
+    (Path(run) / f"{step}.prompt.txt").write_text(message)
+    j = local_call("/v1/chat/completions", {"model": LOCAL_MODEL, "temperature": 0.7, "max_tokens": 12000,
+                   "messages": [{"role": "system", "content": system}, {"role": "user", "content": message}]}, timeout=timeout)
+    text = re.sub(r"<think>[\s\S]*?</think>", "", j["choices"][0]["message"].get("content") or "").strip()
+    if not text:
+        raise RuntimeError("local model returned no text")
+    st = load(run)
+    stp = st["steps"].setdefault(step, {})
+    stp["tokens"] = (j.get("usage") or {}).get("total_tokens")
+    stp["model"] = "local/" + LOCAL_MODEL
+    save(run, st)
+    (Path(run) / f"{step}.out.txt").write_text(text)
+    return text
+
+
 def fill(template, st, **extra):
     vals = {"TITLE": st.get("title", ""), "ANGLE": st.get("angle", ""), "CATEGORY": st.get("category", ""),
             "SAFETY": st.get("safety", "none"), "AUTHOR": st.get("author", ""), "AUTHOR_ROLE": st.get("author_role", ""),
-            "ILLUSTRATION": st.get("illustration", ""), "DATE": st.get("date", ""), "SLUG": st.get("slug", "")}
+            "ILLUSTRATION": st.get("illustration", ""), "DATE": st.get("date", ""), "SLUG": st.get("slug", ""),
+            "PERSONA": load_persona(st["engine"])[2] if st.get("engine") in PERSONA_OF_ENGINE else ""}
     vals.update(extra)
     for k, v in vals.items():
         template = template.replace("{{" + k + "}}", str(v))
@@ -299,6 +341,8 @@ def fill(template, st, **extra):
 
 def agent(run, step, agent_id, message, timeout=900, model=None, thinking=None):
     st = load(run)
+    if st["engine"] == "local" and agent_id == "redaktor":
+        return local_chat(run, step, message, timeout)
     mf = Path(run) / f"{step}.prompt.txt"
     mf.write_text(message)
     cmd = [OPENCLAW, "agent", "--agent", agent_id, "--session-key", f"forge:{st['run_id']}:{step}",
@@ -390,11 +434,11 @@ def normalise(run, text):
     title = fm_get(fm, "title") or st["title"]
     excerpt = fm_get(fm, "excerpt").replace('"', "'")
     srcs = urls_in(body.split("## Sources")[-1]) if "## Sources" in body else []
-    hero = f"/images/{st['slug']}-hero.png" if st.get("image") != "fallback" else FALLBACK_HERO[st["category"]]
+    hero = f"/images/{st['slug']}-hero.webp" if st.get("image") != "fallback" else FALLBACK_HERO[st["category"]]
     lines = ["---", f'title: "{title.replace(chr(34), chr(39))}"', f"category: {st['category']}", f"tags: {tags}",
              f"author: {st['author']}", f"authorRole: {st['author_role']}", f"date: {st['date']}",
              f"readTime: {max(3, round(wc / 200))}", f'excerpt: "{excerpt}"', f"illustration: {st['illustration']}",
-             f"heroImage: {hero}", "featured: false", "free: true", "sources:"]
+             f"heroImage: {hero}", "featured: false", f"free: {str(st.get('free', True)).lower()}", "sources:"]
     lines += [f"  - {u}" for u in srcs]
     lines.append("---")
     return "\n".join(lines) + "\n\n" + body + "\n", wc, srcs
@@ -583,6 +627,15 @@ def cmd_review2(a):
 
 # ---------------------------------------------------------------- image
 
+def to_webp(png_bytes, dest, max_width=1600, quality=80):
+    import io
+    from PIL import Image
+    im = Image.open(io.BytesIO(png_bytes)).convert("RGB")
+    if im.width > max_width:
+        im = im.resize((max_width, round(im.height * max_width / im.width)), Image.LANCZOS)
+    im.save(dest, "WEBP", quality=quality, method=6)
+
+
 def cmd_image(a):
     def go():
         st = load(a.run)
@@ -594,9 +647,15 @@ def cmd_image(a):
             prompt = agent(a.run, "imageprompt", "redaktor",
                            fill((PROMPTS / "image.md").read_text(), st, EXCERPT=fm_get(fm, "excerpt")), timeout=300)
             prompt = strip_fences(prompt)[:900]
+            if st["engine"] == "local":
+                try:
+                    local_call("/unload", timeout=60, method="GET")
+                    time.sleep(8)
+                except Exception:
+                    pass
             r = subprocess.run(SSH_IMG, input=prompt.encode(), capture_output=True, timeout=900)
             if r.returncode == 0 and r.stdout[:4] == b"\x89PNG":
-                (d / "hero.png").write_bytes(r.stdout)
+                to_webp(r.stdout, d / "hero.webp")
                 st = load(a.run)
                 st["image"] = "generated"
                 st["image_prompt"] = prompt
@@ -621,6 +680,8 @@ def cmd_publish(a):
     def go():
         st = load(a.run)
         d = Path(a.run)
+        st["free"] = random.random() < 0.5
+        save(a.run, st)
         article, wc, srcs = normalise(a.run, (d / "draft.md").read_text())
         gone = dead_urls(srcs)
         if gone:
@@ -640,8 +701,8 @@ def cmd_publish(a):
         (target / "index.md").write_text(article)
         paths = [target]
         if st.get("image") == "generated":
-            img = ROOT / "public" / "images" / f"{st['slug']}-hero.png"
-            img.write_bytes((d / "hero.png").read_bytes())
+            img = ROOT / "public" / "images" / f"{st['slug']}-hero.webp"
+            img.write_bytes((d / "hero.webp").read_bytes())
             paths.append(img)
         claim = CLAIMS / f"{st['slug']}.json"
         c = json.loads(claim.read_text()) if claim.exists() else {"slug": st["slug"], "engine": st["engine"], "date": st["date"]}
@@ -681,7 +742,7 @@ def cmd_notify(a):
     log_run(st)
     note = "" if st.get("image") == "generated" else f"\nImage: FALLBACK used ({st.get('image_note', '')[:100]})"
     rev = " (1 revision)" if st.get("revised") else ""
-    telegram(f"The Ancestral Forge [{st['engine']}]: published{rev}\n{st['title']}\n{st['url']}\n"
+    telegram(f"The Ancestral Forge [{st['engine']}, {st.get('author', '')}]: published{rev}, {'free' if st.get('free') else 'members only'}\n{st['title']}\n{st['url']}\n"
              f"{'Live now.' if live else 'Goes live within 15 min (server pulls from git).'}"
              f"\n{st.get('words')} words, {secs // 60} min, {toks} tokens{note}")
     out({"ok": True, "url": st["url"], "live": live, "seconds": secs, "tokens": toks})

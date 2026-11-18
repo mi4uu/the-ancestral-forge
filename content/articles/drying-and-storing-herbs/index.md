@@ -8,7 +8,7 @@ date: 2026-11-18
 readTime: 6
 excerpt: "Dry herbs thoroughly before sealing them in jars. Good airflow, careful dryness checks and cool, dry storage help protect their flavour and quality."
 illustration: herb-bundle
-heroImage: /images/drying-and-storing-herbs-hero.png
+heroImage: /images/drying-and-storing-herbs-hero.webp
 featured: false
 free: true
 sources:

@@ -8,7 +8,7 @@ date: 2026-11-18
 readTime: 6
 excerpt: "Learn yarrow’s field marks, how to distinguish it from poison hemlock, and what historical use can and cannot tell you."
 illustration: herb-bundle
-heroImage: /images/yarrow-field-guide-and-lookalikes-hero.png
+heroImage: /images/yarrow-field-guide-and-lookalikes-hero.webp
 featured: false
 free: true
 sources:

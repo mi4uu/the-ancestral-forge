@@ -8,7 +8,7 @@ date: 2026-11-18
 readTime: 6
 excerpt: "Common plantain grows in trampled places and has edible leaves and seeds. Learn what to confirm before gathering it, and where traditional uses stop short of proven evidence."
 illustration: herb-bundle
-heroImage: /images/plantain-the-weed-under-your-boots-hero.png
+heroImage: /images/plantain-the-weed-under-your-boots-hero.webp
 featured: false
 free: true
 sources:

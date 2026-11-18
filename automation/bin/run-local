@@ -1,0 +1,20 @@
+#!/bin/bash
+# Third engine: a plain bash runner, no workflow engine. Outline, draft and revise run on the local
+# Ornith model (llama-swap on salonpc); research and review stay on OpenClaw agents.
+# Usage: run-local [force]. A failed run is retried once; if salonpc is off the run fails (no cloud fallback).
+FG=/home/mjl/forge-automation/repo/automation/bin/forge.py
+Q=/home/mjl/forge-automation/repo/automation/work/.quiet
+for ATTEMPT in 1 2; do
+  SINCE=$(TZ=Europe/Warsaw date +%Y%m%d-%H%M%S)
+  mkdir -p "$(dirname $Q)"; if [ $ATTEMPT = 1 ]; then touch $Q; else rm -f $Q; fi
+  F=""; [ "${1:-}" = "force" ] && F="--force"
+  RUN=$(python3 "$FG" init --engine local $F | python3 -c 'import sys,json;print(json.load(sys.stdin)["run"])')
+  export RUN
+  for STEP in pick research outline draft review1 revise review2 image publish notify; do
+    timeout 3000 python3 "$FG" $STEP --run "$RUN" >> "$RUN/runner.log" 2>&1 || break
+  done
+  RES=$(python3 "$FG" finalize --engine local --since "$SINCE" --note "see $RUN/runner.log" 2>&1 | tail -1)
+  echo "$RES"
+  case "$RES" in *'"failed"'*) ;; *) break;; esac
+done
+rm -f $Q

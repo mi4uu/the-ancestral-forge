@@ -8,7 +8,7 @@ date: 2026-11-18
 readTime: 5
 excerpt: "Water, alcohol and oil produce different herbal preparations. Learn how tea is made and how to handle storage and safety."
 illustration: herb-bundle
-heroImage: /images/infused-oils-vs-tinctures-vs-teas-hero.png
+heroImage: /images/infused-oils-vs-tinctures-vs-teas-hero.webp
 featured: false
 free: true
 sources:
