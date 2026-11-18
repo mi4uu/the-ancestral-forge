@@ -2,8 +2,9 @@
   "slug": "nettle-patch-to-plate",
   "engine": "lobster",
   "date": "2026-11-18",
-  "status": "claimed",
+  "status": "failed",
   "claimedAt": "2026-11-18T04:48:44+01:00",
   "run": "20261118-044842-lobster",
-  "attempts": 2
+  "attempts": 2,
+  "reason": "step draft: draft length 920 words is outside 1000-2400"
 }
