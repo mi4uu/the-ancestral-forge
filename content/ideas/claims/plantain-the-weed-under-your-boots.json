@@ -2,8 +2,9 @@
   "slug": "plantain-the-weed-under-your-boots",
   "engine": "lobster",
   "date": "2026-11-18",
-  "status": "claimed",
+  "status": "failed",
   "claimedAt": "2026-11-18T05:11:59+01:00",
   "run": "20261118-051157-lobster",
-  "attempts": 1
+  "attempts": 1,
+  "reason": "step draft: draft has no frontmatter"
 }
