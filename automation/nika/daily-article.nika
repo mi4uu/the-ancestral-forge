@@ -1,97 +1,131 @@
+# Same pipeline as ../lobster/daily-article.lobster; every step is a call to bin/forge.py.
+# The gate task exists because nika refuses an unattended exec + fs pipeline (NIKA-SEC-009,
+# lethal trifecta) unless a blocking prompt dominates it. bin/run-nika answers it with --answer.
 nika: forge-daily-article
 
 inputs:
   force: { type: string, default: "0" }
 
 permits:
-  exec: ["python3"]
+  exec: ["python3", "/home/mjl/forge-automation/repo/automation/bin/forge.py"]
+  tools: ["nika:prompt"]
   fs:
-    read: ["/home/mjl", "/tmp", "/usr", "/etc", "/lib", "/bin", "/proc", "/dev"]
-    write: ["/home/mjl", "/tmp", "/dev"]
+    read: ["/home/mjl", "/usr", "/etc", "/lib", "/bin", "/opt", "/proc", "/dev", "/tmp", "/sys", "/run"]
+    write: ["/home/mjl/forge-automation", "/home/mjl/.openclaw", "/home/mjl/.cache", "/tmp", "/dev"]
 
 tasks:
+  human:
+    invoke:
+      tool: "nika:prompt"
+      args:
+        message: "Run the daily article pipeline now?"
+
   init:
+    with:
+      go: ${{ tasks.human.output }}
+    when: ${{ with.go == true }}
+    after: { human: success }
     exec:
-      command: ["python3", "/home/mjl/forge-automation/repo/automation/bin/forge.py", "init", "--engine", "nika"]
+      command: ["/home/mjl/forge-automation/repo/automation/bin/forge.py", "init", "--engine", "nika"]
       env: { FORGE_FORCE: "${{ inputs.force }}" }
     timeout: "2m"
 
   pick:
     with:
       run: ${{ tasks.init.output.run }}
+      go: ${{ tasks.human.output }}
+    when: ${{ with.go == true }}
     after: { init: success }
     exec:
-      command: ["python3", "/home/mjl/forge-automation/repo/automation/bin/forge.py", "pick", "--run", "${{ with.run }}"]
+      command: ["/home/mjl/forge-automation/repo/automation/bin/forge.py", "pick", "--run", "${{ with.run }}"]
     timeout: "5m"
 
   research:
     with:
       run: ${{ tasks.init.output.run }}
+      go: ${{ tasks.human.output }}
+    when: ${{ with.go == true }}
     after: { pick: success }
     exec:
-      command: ["python3", "/home/mjl/forge-automation/repo/automation/bin/forge.py", "research", "--run", "${{ with.run }}"]
+      command: ["/home/mjl/forge-automation/repo/automation/bin/forge.py", "research", "--run", "${{ with.run }}"]
     timeout: "40m"
 
   outline:
     with:
       run: ${{ tasks.init.output.run }}
+      go: ${{ tasks.human.output }}
+    when: ${{ with.go == true }}
     after: { research: success }
     exec:
-      command: ["python3", "/home/mjl/forge-automation/repo/automation/bin/forge.py", "outline", "--run", "${{ with.run }}"]
+      command: ["/home/mjl/forge-automation/repo/automation/bin/forge.py", "outline", "--run", "${{ with.run }}"]
     timeout: "25m"
 
   draft:
     with:
       run: ${{ tasks.init.output.run }}
+      go: ${{ tasks.human.output }}
+    when: ${{ with.go == true }}
     after: { outline: success }
     exec:
-      command: ["python3", "/home/mjl/forge-automation/repo/automation/bin/forge.py", "draft", "--run", "${{ with.run }}"]
+      command: ["/home/mjl/forge-automation/repo/automation/bin/forge.py", "draft", "--run", "${{ with.run }}"]
     timeout: "25m"
 
   review1:
     with:
       run: ${{ tasks.init.output.run }}
+      go: ${{ tasks.human.output }}
+    when: ${{ with.go == true }}
     after: { draft: success }
     exec:
-      command: ["python3", "/home/mjl/forge-automation/repo/automation/bin/forge.py", "review1", "--run", "${{ with.run }}"]
+      command: ["/home/mjl/forge-automation/repo/automation/bin/forge.py", "review1", "--run", "${{ with.run }}"]
     timeout: "25m"
 
   revise:
     with:
       run: ${{ tasks.init.output.run }}
+      go: ${{ tasks.human.output }}
+    when: ${{ with.go == true }}
     after: { review1: success }
     exec:
-      command: ["python3", "/home/mjl/forge-automation/repo/automation/bin/forge.py", "revise", "--run", "${{ with.run }}"]
+      command: ["/home/mjl/forge-automation/repo/automation/bin/forge.py", "revise", "--run", "${{ with.run }}"]
     timeout: "25m"
 
   review2:
     with:
       run: ${{ tasks.init.output.run }}
+      go: ${{ tasks.human.output }}
+    when: ${{ with.go == true }}
     after: { revise: success }
     exec:
-      command: ["python3", "/home/mjl/forge-automation/repo/automation/bin/forge.py", "review2", "--run", "${{ with.run }}"]
+      command: ["/home/mjl/forge-automation/repo/automation/bin/forge.py", "review2", "--run", "${{ with.run }}"]
     timeout: "25m"
 
   image:
     with:
       run: ${{ tasks.init.output.run }}
+      go: ${{ tasks.human.output }}
+    when: ${{ with.go == true }}
     after: { review2: success }
     exec:
-      command: ["python3", "/home/mjl/forge-automation/repo/automation/bin/forge.py", "image", "--run", "${{ with.run }}"]
+      command: ["/home/mjl/forge-automation/repo/automation/bin/forge.py", "image", "--run", "${{ with.run }}"]
     timeout: "25m"
 
   publish:
     with:
       run: ${{ tasks.init.output.run }}
+      go: ${{ tasks.human.output }}
+    when: ${{ with.go == true }}
     after: { image: success }
     exec:
-      command: ["python3", "/home/mjl/forge-automation/repo/automation/bin/forge.py", "publish", "--run", "${{ with.run }}"]
+      command: ["/home/mjl/forge-automation/repo/automation/bin/forge.py", "publish", "--run", "${{ with.run }}"]
     timeout: "5m"
 
   notify:
     with:
       run: ${{ tasks.init.output.run }}
+      go: ${{ tasks.human.output }}
+    when: ${{ with.go == true }}
     after: { publish: success }
     exec:
-      command: ["python3", "/home/mjl/forge-automation/repo/automation/bin/forge.py", "notify", "--run", "${{ with.run }}"]
+      command: ["/home/mjl/forge-automation/repo/automation/bin/forge.py", "notify", "--run", "${{ with.run }}"]
     timeout: "25m"

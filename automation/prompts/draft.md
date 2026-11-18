@@ -19,6 +19,8 @@ Topic: {{TITLE}}
 Angle: {{ANGLE}}
 Safety class: {{SAFETY}}
 
+The body (without frontmatter and the Sources list) must be 1,400 to 1,800 words: about 200 words for each of 7 or 8 sections. Count as you go; a short draft will be sent back.
+
 Follow the outline. Use only facts from the dossier and cite them naturally in the text or in ## Sources. Reply with the file content only, starting with the line `---`.
 
 ## Outline

@@ -1,5 +1,9 @@
 #!/bin/bash
 # Manual or cron trigger for the Lobster engine. Usage: run-lobster [force]
+FG=/home/mjl/forge-automation/repo/automation/bin/forge.py
+SINCE=$(TZ=Europe/Warsaw date +%Y%m%d-%H%M%S)
 MSG="Run the daily article with Lobster."
 [ "${1:-}" = "force" ] && MSG="$MSG force"
-exec openclaw agent --agent forgerun --session-key "forge:lobster:$(date +%Y%m%d-%H%M%S)" --message "$MSG" --timeout 3300 --json
+OUT=$(timeout 3400 openclaw agent --agent forgerun --session-key "forge:lobster:$SINCE" --message "$MSG" --timeout 3300 2>&1)
+echo "$OUT" | tail -5
+python3 "$FG" finalize --engine lobster --since "$SINCE" --note "$(echo "$OUT" | tail -c 200 | tr '\n' ' ')"

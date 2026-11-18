@@ -41,11 +41,12 @@ FALLBACK_HERO = {
     "the-forge": "/images/rocket-stoves-hero.png",
     "field-notes": "/images/how-to-read-landscape-hero.png",
 }
-BANNED = ["genuinely", "extraordinary", "significantly", "straightforward", "crucial", "foster", "streamline",
-          "empower", "elevate", "facilitate", "underscore", "nuanced", "realm", "multifaceted", "moreover",
+BANNED = ["genuinely", "extraordinary", "significantly", "straightforward", "crucial", "streamline",
+          "empower", "elevate", "facilitate", "underscore", "nuanced", "multifaceted", "moreover",
           "furthermore", "in conclusion", "to summarise", "to summarize", "it's worth noting", "it is worth noting",
-          "it's important to note", "delve", "paradigm", "leverage", "synergy", "holistic", "pivotal",
-          "groundbreaking", "cutting-edge", "seamless", "utilise", "utilize", "tapestry", "unlock", "game-changer"]
+          "it's important to note", "delve", "paradigm", "synergy", "pivotal",
+          "groundbreaking", "cutting-edge", "seamless", "utilise", "utilize", "tapestry", "game-changer"]
+SOFT_BANNED = ["foster", "realm", "leverage", "unlock", "holistic", "landscape", "robust", "harness", "navigate"]
 MED_BOX = "**Not medical advice.**"
 
 
@@ -378,29 +379,33 @@ def normalise(run, text):
 
 
 def lint(st, text):
+    """Returns (hard, hints). Hard issues force a revision; hints go to the reviewer, who decides."""
     fm, body = split_article(text)
-    issues = []
-    if "—" in text:
-        issues.append("em dash found")
+    hard, hints = [], []
+    if "\u2014" in text:
+        hard.append("em dash found")
     if " -- " in text:
-        issues.append("double hyphen used as dash")
+        hard.append("double hyphen used as dash")
     low = body.lower()
     for w in BANNED:
         if re.search(rf"\b{re.escape(w)}\b", low):
-            issues.append(f"banned word: {w}")
-    if re.search(r"\b\d+(\.\d+)?\s?(mg|mcg|µg|ml|drops?)\b", low) and st["safety"] in ("herbal", "toxic"):
-        issues.append("possible dosage (number with mg/ml/drops)")
-    if re.search(r"\b(twice|three times|once) (a|per) day\b|\bper day\b|\bdaily dose\b|\btake \d", low):
-        issues.append("possible dosing language")
-    if re.search(r"\b(cures?|cured by|heals? (your|the|any)|prevents? (cancer|diabetes|disease)|reverses?)\b", low):
-        issues.append("possible cure or prevention claim")
+            hard.append(f"banned word: {w}")
     if st["safety"] in ("herbal", "toxic") and MED_BOX not in body:
-        issues.append("missing the Not medical advice box")
+        hard.append("missing the Not medical advice box")
     if st["safety"] in ("toxic", "food") and not re.search(r"^## .*safety", body, re.I | re.M):
-        issues.append("missing a Safety section")
+        hard.append("missing a Safety section")
+    for w in SOFT_BANNED:
+        if re.search(rf"\b{re.escape(w)}\b", low):
+            hints.append(f"check use of '{w}' (banned when used as filler or metaphor)")
+    if re.search(r"\b\d+(\.\d+)?\s?(mg|mcg|µg|ml|drops?)\b", low) and st["safety"] in ("herbal", "toxic"):
+        hints.append("a number with mg/ml/drops appears: check it is not a medicinal dose")
+    if re.search(r"\b(twice|three times|once) (a|per) day\b|\bdaily dose\b|\btake \d", low):
+        hints.append("possible dosing language: check it")
+    if re.search(r"\b(cures?|cured by|heals? (your|the|any)|prevents? (cancer|diabetes|disease)|reverses?)\b", low):
+        hints.append("cure/prevent wording appears: check it is not a disease claim (food curing is fine)")
     if len(re.findall(r"\bit is\b", low)) > 6:
-        issues.append("many uncontracted 'it is'")
-    return issues
+        hints.append("many uncontracted 'it is'")
+    return hard, hints
 
 
 def cmd_draft(a):
@@ -410,6 +415,12 @@ def cmd_draft(a):
         prompt = fill((PROMPTS / "draft.md").read_text(), st, OUTLINE=(d / "outline.md").read_text(), DOSSIER=(d / "research.md").read_text())
         text = agent(a.run, "draft", "redaktor", prompt, timeout=900)
         article, wc, srcs = normalise(a.run, text)
+        if wc < 1250 or wc > 2050:
+            direction = "too short: expand it to about 1,600 words by adding concrete detail from the dossier" if wc < 1250 else "too long: cut it to about 1,700 words"
+            retry = (f"Your draft is {wc} words, {direction}. Keep everything else. Reply with the complete index.md only.\n\n"
+                     f"## Current draft\n{article}\n\n## Dossier\n{(d / 'research.md').read_text()}")
+            text = agent(a.run, "draft2", "redaktor", retry, timeout=900)
+            article, wc, srcs = normalise(a.run, text)
         if wc < 1000 or wc > 2400:
             raise RuntimeError(f"draft length {wc} words is outside 1000-2400")
         if len(srcs) < 3:
@@ -432,10 +443,12 @@ def do_review(run, round_):
     st = load(run)
     d = Path(run)
     draft = (d / "draft.md").read_text()
-    lint_issues = lint(st, draft)
+    lint_issues, lint_hints = lint(st, draft)
     prompt = fill((PROMPTS / "review.md").read_text(), st, DOSSIER=(d / "research.md").read_text(), DRAFT=draft)
     if lint_issues:
-        prompt += "\n\nAutomated lint already found these (confirm and include them): " + "; ".join(lint_issues)
+        prompt += "\n\nAutomated lint found these hard problems (confirm and include them): " + "; ".join(lint_issues)
+    if lint_hints:
+        prompt += "\n\nLint hints (judge them yourself, they are often false alarms): " + "; ".join(lint_hints)
     text = agent(run, f"review{round_}", "reviewer", prompt, timeout=900, model=REVIEW_MODEL)
     try:
         v = parse_verdict(text)
@@ -559,6 +572,7 @@ def cmd_publish(a):
         if not git_sync_push(f"article: {st['slug']} ({st['engine']})", paths):
             raise RuntimeError("push failed after retries")
         st = load(a.run)
+        st["title"] = fm_get(split_article(article)[0], "title") or st["title"]
         st["url"] = f"{SITE}/articles/{st['slug']}"
         st["words"] = wc
         save(a.run, st)
@@ -592,6 +606,25 @@ def cmd_notify(a):
     out({"ok": True, "url": st["url"], "live": live, "seconds": secs, "tokens": toks})
 
 
+def cmd_finalize(a):
+    """Called by the trigger wrappers after the engine returns: catches aborts the pipeline itself could not report."""
+    runs = sorted(p for p in WORK.glob(f"*-{a.engine}") if p.name >= a.since)
+    if not runs:
+        telegram(f"The Ancestral Forge [{a.engine}]: no article today. Reason: the engine failed before the first step ({a.note[:200]})")
+        out({"finalized": "no-run"})
+        return
+    run = runs[-1]
+    st = load(run)
+    if st["status"] == "running":
+        if st.get("url"):
+            a.run = str(run)
+            a.no_wait = False
+            cmd_notify(a)
+        else:
+            fail(str(run), f"the {a.engine} engine stopped before the pipeline finished (last step: {list(st['steps'])[-1] if st['steps'] else 'none'})")
+    out({"finalized": st["status"]})
+
+
 def cmd_fail(a):
     fail(a.run, a.reason)
 
@@ -602,6 +635,10 @@ def main():
     i = sub.add_parser("init")
     i.add_argument("--engine", required=True)
     i.add_argument("--force", action="store_true")
+    f = sub.add_parser("finalize")
+    f.add_argument("--engine", required=True)
+    f.add_argument("--since", required=True)
+    f.add_argument("--note", default="")
     for name in ("pick", "research", "outline", "draft", "review1", "revise", "review2", "image", "publish", "notify", "fail"):
         s = sub.add_parser(name)
         s.add_argument("--run", default=os.environ.get("RUN"), required=False)
@@ -610,9 +647,9 @@ def main():
         if name == "notify":
             s.add_argument("--no-wait", action="store_true")
     a = p.parse_args()
-    if a.cmd != "init" and not a.run:
+    if a.cmd not in ("init", "finalize") and not a.run:
         p.error("--run or $RUN required")
-    if a.cmd not in ("init", "pick", "fail") and load(a.run).get("status") == "skipped":
+    if a.cmd not in ("init", "pick", "fail", "finalize") and load(a.run).get("status") == "skipped":
         out({"skipped": True})
         return
     globals()["cmd_" + a.cmd](a)

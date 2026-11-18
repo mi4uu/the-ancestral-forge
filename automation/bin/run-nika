@@ -1,5 +1,9 @@
 #!/bin/bash
 # Manual or cron trigger for the nika engine. Usage: run-nika [force]
+FG=/home/mjl/forge-automation/repo/automation/bin/forge.py
+SINCE=$(TZ=Europe/Warsaw date +%Y%m%d-%H%M%S)
+FORCE=0; [ "${1:-}" = "force" ] && FORCE=1
 cd /home/mjl/forge-automation/repo/automation/nika || exit 1
-F=false; [ "${1:-}" = "force" ] && F=true
-exec /home/mjl/.nika/bin/nika run daily-article.nika --var force=$([ "$F" = true ] && echo 1 || echo 0)
+OUT=$(timeout 3400 /home/mjl/.nika/bin/nika run daily-article.nika --var force=$FORCE --answer human=true --quiet 2>&1)
+echo "$OUT" | tail -8
+python3 "$FG" finalize --engine nika --since "$SINCE" --note "$(echo "$OUT" | tail -c 200 | tr '\n' ' ')"
