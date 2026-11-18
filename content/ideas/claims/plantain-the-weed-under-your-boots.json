@@ -2,8 +2,11 @@
   "slug": "plantain-the-weed-under-your-boots",
   "engine": "lobster",
   "date": "2026-11-18",
-  "status": "claimed",
+  "status": "failed",
   "claimedAt": "2026-11-18T05:15:08+01:00",
   "run": "20261118-051507-lobster",
-  "attempts": 2
+  "attempts": 2,
+  "publishedAt": "2026-11-18T05:23:32+01:00",
+  "url": "https://ancestralforge.org/articles/plantain-the-weed-under-your-boots",
+  "reason": "step publish: [Errno 21] Is a directory: '/home/mjl/forge-automation/repo/content/articles/plantain-the-weed-under-your-boots'"
 }
