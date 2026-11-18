@@ -2,8 +2,8 @@
 title: "Drying and Storing Herbs"
 category: the-apothecary
 tags: herbs, drying, food-preservation, storage, mould
-author: Silas Whitford
-authorRole: SR. BOTANICAL CORRESPONDENT
+author: R. Halloway
+authorRole: FIELD CORRESPONDENT
 date: 2026-11-18
 readTime: 6
 excerpt: "Dry herbs thoroughly before sealing them in jars. Good airflow, careful dryness checks and cool, dry storage help protect their flavour and quality."
