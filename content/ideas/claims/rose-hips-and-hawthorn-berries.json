@@ -2,8 +2,9 @@
   "slug": "rose-hips-and-hawthorn-berries",
   "engine": "local",
   "date": "2026-11-18",
-  "status": "claimed",
+  "status": "failed",
   "claimedAt": "2026-11-18T08:01:54+01:00",
   "run": "20261118-080153-local",
-  "attempts": 2
+  "attempts": 2,
+  "reason": "step revise: draft has no frontmatter"
 }
