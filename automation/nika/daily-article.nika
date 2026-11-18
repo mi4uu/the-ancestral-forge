@@ -23,6 +23,8 @@ tasks:
         message: "Run the daily article pipeline now?"
 
   init:
+    extract:
+      run: "fromjson | .run"
     with:
       go: ${{ tasks.human.output }}
     when: ${{ with.go == true }}
@@ -34,7 +36,7 @@ tasks:
 
   pick:
     with:
-      run: ${{ tasks.init.output.run }}
+      run: ${{ tasks.init.run }}
       go: ${{ tasks.human.output }}
     when: ${{ with.go == true }}
     after: { init: success }
@@ -44,7 +46,7 @@ tasks:
 
   research:
     with:
-      run: ${{ tasks.init.output.run }}
+      run: ${{ tasks.init.run }}
       go: ${{ tasks.human.output }}
     when: ${{ with.go == true }}
     after: { pick: success }
@@ -54,7 +56,7 @@ tasks:
 
   outline:
     with:
-      run: ${{ tasks.init.output.run }}
+      run: ${{ tasks.init.run }}
       go: ${{ tasks.human.output }}
     when: ${{ with.go == true }}
     after: { research: success }
@@ -64,7 +66,7 @@ tasks:
 
   draft:
     with:
-      run: ${{ tasks.init.output.run }}
+      run: ${{ tasks.init.run }}
       go: ${{ tasks.human.output }}
     when: ${{ with.go == true }}
     after: { outline: success }
@@ -74,7 +76,7 @@ tasks:
 
   review1:
     with:
-      run: ${{ tasks.init.output.run }}
+      run: ${{ tasks.init.run }}
       go: ${{ tasks.human.output }}
     when: ${{ with.go == true }}
     after: { draft: success }
@@ -84,7 +86,7 @@ tasks:
 
   revise:
     with:
-      run: ${{ tasks.init.output.run }}
+      run: ${{ tasks.init.run }}
       go: ${{ tasks.human.output }}
     when: ${{ with.go == true }}
     after: { review1: success }
@@ -94,7 +96,7 @@ tasks:
 
   review2:
     with:
-      run: ${{ tasks.init.output.run }}
+      run: ${{ tasks.init.run }}
       go: ${{ tasks.human.output }}
     when: ${{ with.go == true }}
     after: { revise: success }
@@ -104,7 +106,7 @@ tasks:
 
   image:
     with:
-      run: ${{ tasks.init.output.run }}
+      run: ${{ tasks.init.run }}
       go: ${{ tasks.human.output }}
     when: ${{ with.go == true }}
     after: { review2: success }
@@ -114,7 +116,7 @@ tasks:
 
   publish:
     with:
-      run: ${{ tasks.init.output.run }}
+      run: ${{ tasks.init.run }}
       go: ${{ tasks.human.output }}
     when: ${{ with.go == true }}
     after: { image: success }
@@ -124,7 +126,7 @@ tasks:
 
   notify:
     with:
-      run: ${{ tasks.init.output.run }}
+      run: ${{ tasks.init.run }}
       go: ${{ tasks.human.output }}
     when: ${{ with.go == true }}
     after: { publish: success }
