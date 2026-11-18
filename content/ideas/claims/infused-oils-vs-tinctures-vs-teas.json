@@ -2,8 +2,9 @@
   "slug": "infused-oils-vs-tinctures-vs-teas",
   "engine": "lobster",
   "date": "2026-11-18",
-  "status": "claimed",
+  "status": "failed",
   "claimedAt": "2026-11-18T06:01:32+01:00",
   "run": "20261118-060130-lobster",
-  "attempts": 1
+  "attempts": 1,
+  "reason": "step review2: agent reviewer bad output: Gateway agent call timed out; the Gateway may still be running this turn. Check `openclaw gateway status` and the session transcript before retrying or rerunni"
 }
