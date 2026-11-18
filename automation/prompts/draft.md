@@ -23,6 +23,8 @@ The body (without frontmatter and the Sources list) must be 1,500 to 1,900 words
 
 The dossier uses bracket numbers [1] for its own bookkeeping: do not copy them into the article. Name sources in the sentence instead.
 
+Never write about what your sources do or do not cover. If something is not in the dossier, leave it out.
+
 Follow the outline. Use only facts from the dossier and cite them naturally in the text or in ## Sources. Reply with the file content only, starting with the line `---`.
 
 ## Outline

@@ -1,9 +1,16 @@
 #!/bin/bash
 # Manual or cron trigger for the nika engine. Usage: run-nika [force]
+# A failed run is retried once (the failed topic is picked again); only the second failure sends a notice.
 FG=/home/mjl/forge-automation/repo/automation/bin/forge.py
-SINCE=$(TZ=Europe/Warsaw date +%Y%m%d-%H%M%S)
 FORCE=0; [ "${1:-}" = "force" ] && FORCE=1
 cd /home/mjl/forge-automation/repo/automation/nika || exit 1
-OUT=$(timeout 3400 /home/mjl/.nika/bin/nika run daily-article.nika --var force=$FORCE --answer human=true --quiet 2>&1)
-echo "$OUT" | tail -8
-python3 "$FG" finalize --engine nika --since "$SINCE" --note "$(echo "$OUT" | tail -c 200 | tr '\n' ' ')"
+for ATTEMPT in 1 2; do
+  SINCE=$(TZ=Europe/Warsaw date +%Y%m%d-%H%M%S)
+  Q=/home/mjl/forge-automation/repo/automation/work/.quiet; mkdir -p "$(dirname $Q)"; if [ $ATTEMPT = 1 ]; then touch $Q; else rm -f $Q; fi
+  OUT=$(timeout 3400 /home/mjl/.nika/bin/nika run daily-article.nika --var force=$FORCE --answer human=true --quiet 2>&1)
+  echo "$OUT" | tail -8
+  RES=$(python3 "$FG" finalize --engine nika --since "$SINCE" --note "$(echo "$OUT" | tail -c 200 | tr '\n' ' ')" 2>&1 | tail -1)
+  echo "$RES"
+  case "$RES" in *'"failed"'*) ;; *) break;; esac
+done
+rm -f /home/mjl/forge-automation/repo/automation/work/.quiet

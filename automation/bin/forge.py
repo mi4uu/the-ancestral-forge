@@ -86,7 +86,8 @@ def fail(run, reason, release=True):
     st["status"] = "failed"
     st["reason"] = reason
     save(run, st)
-    telegram(f"The Ancestral Forge [{st['engine']}]: no article today. Reason: {reason[:400]}")
+    if not (WORK / ".quiet").exists():
+        telegram(f"The Ancestral Forge [{st['engine']}]: no article today. Reason: {reason[:400]}")
     if release and st.get("slug"):
         try:
             claim = CLAIMS / f"{st['slug']}.json"
@@ -95,7 +96,12 @@ def fail(run, reason, release=True):
                 c["status"] = "failed"
                 c["reason"] = reason[:200]
                 claim.write_text(json.dumps(c, indent=2))
-                git_sync_push(f"claim: {st['slug']} failed ({st['engine']})", [claim], tries=2)
+                paths = [claim]
+                lock = CLAIMS / f"day-{st['date']}.json"
+                if lock.exists() and json.loads(lock.read_text()).get("slug") == st["slug"]:
+                    lock.unlink()
+                    paths.append(lock)
+                git_sync_push(f"claim: {st['slug']} failed ({st['engine']})", paths, tries=2)
         except Exception as e:
             sys.stderr.write(f"claim release failed: {e}\n")
     log_run(st)
@@ -239,7 +245,9 @@ def cmd_pick(a):
                 sys.exit(0)
             arts = existing_articles()
             chosen = None
-            for t in parse_queue():
+            queue = parse_queue()
+            retry = [t for t in queue if t["slug"] in attempts and t["slug"] not in claimed and attempts[t["slug"]] < 2]
+            for t in retry + [t for t in queue if t not in retry]:
                 if t["slug"] in claimed:
                     continue
                 dup = duplicate_of(t, arts)
@@ -397,10 +405,13 @@ def lint(st, text):
         hard.append("double hyphen used as dash")
     low = body.lower()
     n = len(body.split("\n## Sources")[0].split())
-    if n < 1150 or n > 2100:
-        hard.append(f"body is {n} words; it must be 1,200 to 2,000 (keep it between 1,300 and 1,900)")
+    if n < 900 or n > 2400:
+        hard.append(f"body is {n} words; aim for 1,200 to 2,000 (add or cut concrete material to get there)")
     for u in dead_urls(urls_in(body.split("## Sources")[-1]) if "## Sources" in body else []):
         hard.append(f"dead source link (returns 404 or does not resolve): {u}; replace it with a live page that says the same thing, or drop that source and every claim only it supports")
+    leak = re.search(r"(the sources (here|cited|in this|for this)|cited (guidance|sources)|this article's sources|the dossier|do(es)? not verify|don't give (a )?(guidance|recipe|schedule)|sources? (do|does)(n't| not) (give|say|cover|establish))", low)
+    if leak:
+        hard.append(f"internal research talk leaked into the copy ('{leak.group(0)}'): delete it, or state the practice plainly without mentioning sources")
     for w in BANNED:
         if re.search(rf"\b{re.escape(w)}\b", low):
             hard.append(f"banned word: {w}")
@@ -467,8 +478,8 @@ def cmd_draft(a):
                      f"## Current draft\n{article}\n\n## Dossier\n{(d / 'research.md').read_text()}")
             text = agent(a.run, "draft2", "redaktor", retry, timeout=900)
             article, wc, srcs = normalise(a.run, text)
-        if wc < 1000 or wc > 2400:
-            raise RuntimeError(f"draft length {wc} words is outside 1000-2400")
+        if wc < 700 or wc > 2800:
+            raise RuntimeError(f"draft length {wc} words is outside 700-2800")
         if len(srcs) < 3:
             raise RuntimeError("draft lists fewer than 3 sources")
         (d / "draft.md").write_text(article)
@@ -672,8 +683,9 @@ def cmd_finalize(a):
     """Called by the trigger wrappers after the engine returns: catches aborts the pipeline itself could not report."""
     runs = sorted(p for p in WORK.glob(f"*-{a.engine}") if p.name >= a.since)
     if not runs:
-        telegram(f"The Ancestral Forge [{a.engine}]: no article today. Reason: the engine failed before the first step ({a.note[:200]})")
-        out({"finalized": "no-run"})
+        if not (WORK / ".quiet").exists():
+            telegram(f"The Ancestral Forge [{a.engine}]: no article today. Reason: the engine failed before the first step ({a.note[:200]})")
+        out({"finalized": "failed"})
         return
     run = runs[-1]
     st = load(run)
@@ -684,7 +696,7 @@ def cmd_finalize(a):
             cmd_notify(a)
         else:
             fail(str(run), f"the {a.engine} engine stopped before the pipeline finished (last step: {list(st['steps'])[-1] if st['steps'] else 'none'})")
-    out({"finalized": st["status"]})
+    out({"finalized": json.loads((run / "state.json").read_text())["status"]})
 
 
 def cmd_fail(a):

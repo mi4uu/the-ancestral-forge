@@ -1,9 +1,16 @@
 #!/bin/bash
 # Manual or cron trigger for the Lobster engine. Usage: run-lobster [force]
+# A failed run is retried once (the failed topic is picked again); only the second failure sends a notice.
 FG=/home/mjl/forge-automation/repo/automation/bin/forge.py
-SINCE=$(TZ=Europe/Warsaw date +%Y%m%d-%H%M%S)
-MSG="Run the daily article with Lobster."
-[ "${1:-}" = "force" ] && MSG="$MSG force"
-OUT=$(timeout 3400 openclaw agent --agent forgerun --session-key "forge:lobster:$SINCE" --message "$MSG" --timeout 3300 2>&1)
-echo "$OUT" | tail -5
-python3 "$FG" finalize --engine lobster --since "$SINCE" --note "$(echo "$OUT" | tail -c 200 | tr '\n' ' ')"
+for ATTEMPT in 1 2; do
+  SINCE=$(TZ=Europe/Warsaw date +%Y%m%d-%H%M%S)
+  Q=/home/mjl/forge-automation/repo/automation/work/.quiet; mkdir -p "$(dirname $Q)"; if [ $ATTEMPT = 1 ]; then touch $Q; else rm -f $Q; fi
+  MSG="Run the daily article with Lobster."
+  [ "${1:-}" = "force" ] && MSG="$MSG force"
+  OUT=$(timeout 3400 openclaw agent --agent forgerun --session-key "forge:lobster:$SINCE" --message "$MSG" --timeout 3300 2>&1)
+  echo "$OUT" | tail -5
+  RES=$(python3 "$FG" finalize --engine lobster --since "$SINCE" --note "$(echo "$OUT" | tail -c 200 | tr '\n' ' ')" 2>&1 | tail -1)
+  echo "$RES"
+  case "$RES" in *'"failed"'*) ;; *) break;; esac
+done
+rm -f /home/mjl/forge-automation/repo/automation/work/.quiet

@@ -12,6 +12,10 @@ Direct, concrete, practical. A knowledgeable field writer talking to a reader wh
 
 Name the source in the sentence ("Oregon State Extension says...", "the NCHFP guide gives..."). Never use bracket numbers like [3] in the article, and never write "the dossier", "the sources here" or "according to the research". Attribute a fact only to the source that actually says it; if two sources say it, name the clearer one. General safety advice that no source states (ask a health professional, check local rules) stays uncited.
 
+## No meta talk
+
+The reader never sees your sources list as a process. Never write about what the sources do or don't cover ("the sources here don't give guidance", "the cited guidance doesn't say", "not established by the research"). If the dossier is silent on something, leave it out, or state it plainly as ordinary practice without attributing it. Never mention the dossier, the outline or the research.
+
 ## Rhythm traps
 
 Use the "X, not Y" hedge at most once in the whole article. Don't stack caveats. Don't open consecutive sentences the same way. Cut the sentence if it only says what the previous one said.
