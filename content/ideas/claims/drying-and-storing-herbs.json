@@ -2,8 +2,10 @@
   "slug": "drying-and-storing-herbs",
   "engine": "nika",
   "date": "2026-11-18",
-  "status": "claimed",
+  "status": "published",
   "claimedAt": "2026-11-18T06:34:05+01:00",
   "run": "20261118-063403-nika",
-  "attempts": 1
+  "attempts": 1,
+  "publishedAt": "2026-11-18T06:42:34+01:00",
+  "url": "https://ancestralforge.org/articles/drying-and-storing-herbs"
 }
