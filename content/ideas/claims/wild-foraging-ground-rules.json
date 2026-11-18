@@ -2,8 +2,9 @@
   "slug": "wild-foraging-ground-rules",
   "engine": "nika",
   "date": "2026-11-18",
-  "status": "claimed",
+  "status": "failed",
   "claimedAt": "2026-11-18T05:42:08+01:00",
   "run": "20261118-054207-nika",
-  "attempts": 2
+  "attempts": 2,
+  "reason": "still reject after one revision: Length: the automated lint counts the body at 1,146 words, below the 1,200 minimum. It is not one of the round-2 reject grounds, so it is noted only.; The lint's dead-"
 }
