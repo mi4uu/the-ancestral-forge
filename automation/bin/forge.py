@@ -33,7 +33,7 @@ ILLUSTRATION = {"the-apothecary": "herb-bundle", "the-living-pantry": "ferment-j
 PERSONAS = AUTO / "personas"
 PERSONA_OF_ENGINE = {"lobster": "silas-whitford", "nika": "r-halloway", "local": "e-whittier"}
 LOCAL_URL = os.environ.get("FORGE_LOCAL_URL", "http://salonpc.tail4ce15.ts.net:8095")
-LOCAL_MODEL = os.environ.get("FORGE_LOCAL_MODEL", "ornith")
+LOCAL_MODEL = os.environ.get("FORGE_LOCAL_MODEL", "ornith:lowthink")
 FALLBACK_HERO = {
     "the-apothecary": "/images/field-medic-kit-hero.png",
     "the-living-pantry": "/images/4am-sourdough-hero.png",
