@@ -2,8 +2,9 @@
   "slug": "calendula-infused-oil-and-salve",
   "engine": "lobster",
   "date": "2026-11-18",
-  "status": "claimed",
+  "status": "failed",
   "claimedAt": "2026-11-18T05:02:44+01:00",
   "run": "20261118-050242-lobster",
-  "attempts": 2
+  "attempts": 2,
+  "reason": "step image: 'image'"
 }
