@@ -24,7 +24,7 @@ ARTICLES = ROOT / "content" / "articles"
 SITE = "https://ancestralforge.org"
 TG_TARGET = "1689167409"
 OPENCLAW = os.environ.get("OPENCLAW_BIN", "openclaw")
-SSH_IMG = ["ssh", "-i", os.path.expanduser("~/.ssh/forge_img"), "-o", "IdentitiesOnly=yes", "-o", "BatchMode=yes",
+SSH_IMG = ["ssh", "-F", "/dev/null", "-i", os.path.expanduser("~/.ssh/forge_img"), "-o", "IdentitiesOnly=yes", "-o", "BatchMode=yes",
            "-o", "ConnectTimeout=15", "mi4u@192.168.1.137"]
 REVIEW_MODEL = os.environ.get("FORGE_REVIEW_MODEL", "claude-cli/claude-sonnet-5-5")
 REVISE_MODEL = os.environ.get("FORGE_REVISE_MODEL", "openai-codex/gpt-5.5")
