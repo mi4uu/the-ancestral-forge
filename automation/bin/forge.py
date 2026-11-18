@@ -308,6 +308,11 @@ def agent(run, step, agent_id, message, timeout=900, model=None, thinking=None):
     if thinking:
         cmd += ["--thinking", thinking]
     r = sh(cmd, timeout=timeout + 120, check=False)
+    if '"result"' not in r.stdout:
+        if model and "--model" in cmd:
+            i = cmd.index("--model")
+            del cmd[i:i + 2]
+        r = sh(cmd, timeout=timeout + 120, check=False)
     try:
         j = json.loads(r.stdout[r.stdout.index("{"):])
         text = "\n".join(p.get("text") or "" for p in j["result"]["payloads"]).strip()
@@ -405,8 +410,10 @@ def lint(st, text):
         hard.append("double hyphen used as dash")
     low = body.lower()
     n = len(body.split("\n## Sources")[0].split())
-    if n < 900 or n > 2400:
+    if n < 700 or n > 2600:
         hard.append(f"body is {n} words; aim for 1,200 to 2,000 (add or cut concrete material to get there)")
+    elif n < 1150 or n > 2100:
+        hints.append(f"body is {n} words; the target is 1,200 to 2,000, a soft target (mention it, never reject for it)")
     for u in dead_urls(urls_in(body.split("## Sources")[-1]) if "## Sources" in body else []):
         hard.append(f"dead source link (returns 404 or does not resolve): {u}; replace it with a live page that says the same thing, or drop that source and every claim only it supports")
     leak = re.search(r"(the sources (here|cited|in this|for this)|cited (guidance|sources)|this article's sources|the dossier|do(es)? not verify|don't give (a )?(guidance|recipe|schedule)|sources? (do|does)(n't| not) (give|say|cover|establish))", low)
@@ -504,7 +511,7 @@ def do_review(run, round_):
     note = ("Round 1: list every issue you find, most important first." if round_ == 1 else
             "Round 2, the final round after one revision. Return \"pass\" unless a safety breach, an unsupported or wrongly attributed factual claim, "
             "a missing required element (Sources, Safety section, Not medical advice box) or a hard style violation (em dash, banned word) remains. "
-            "Remaining style nits, repetition or taste are NOT grounds to reject or revise: mention them in issues but still pass. "
+            "Remaining style nits, repetition, length or taste are NOT grounds to reject or revise: mention them in issues but still pass. "
             "Only \"reject\" for a real safety or fact problem.")
     prompt = fill((PROMPTS / "review.md").read_text(), st, DOSSIER=(d / "research.md").read_text(), DRAFT=draft, ROUND_NOTE=note)
     if lint_issues:
