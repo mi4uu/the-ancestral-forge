@@ -2,8 +2,9 @@
   "slug": "lemon-balm-and-mint-tea-garden",
   "engine": "lobster",
   "date": "2026-11-18",
-  "status": "claimed",
+  "status": "failed",
   "claimedAt": "2026-11-18T05:56:53+01:00",
   "run": "20261118-055651-lobster",
-  "attempts": 2
+  "attempts": 2,
+  "reason": "still reject after one revision: LENGTH (lint confirmed): the body is about 900 words against the 1,200 to 2,000 required. Fixing it would need concrete additions such as USU's lemon balm and mint var"
 }
