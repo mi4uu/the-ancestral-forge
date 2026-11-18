@@ -9,7 +9,7 @@ writes files in a run directory and prints one JSON object on stdout.
     forge.py pick|research|outline|draft|review1|revise|review2|image|publish|notify --run DIR
     forge.py fail --run DIR --reason TEXT
 """
-import argparse, datetime, difflib, json, os, random, re, subprocess, sys, time, urllib.request
+import fcntl, argparse, datetime, difflib, json, os, random, re, subprocess, sys, time, urllib.request
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
@@ -199,7 +199,16 @@ def timed(run, name, fn):
     return res
 
 
+def locked(fn):
+    def wrapper(*args, **kw):
+        with open(WORK / ".git-lock", "w") as lf:
+            fcntl.flock(lf, fcntl.LOCK_EX)
+            return fn(*args, **kw)
+    return wrapper
+
+
 def cmd_pick(a):
+    @locked
     def go():
         st = load(a.run)
         for attempt in range(6):
@@ -523,6 +532,7 @@ def cmd_image(a):
 # ---------------------------------------------------------------- publish
 
 def cmd_publish(a):
+    @locked
     def go():
         st = load(a.run)
         d = Path(a.run)
