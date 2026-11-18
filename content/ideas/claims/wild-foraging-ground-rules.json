@@ -2,8 +2,9 @@
   "slug": "wild-foraging-ground-rules",
   "engine": "nika",
   "date": "2026-11-18",
-  "status": "claimed",
+  "status": "failed",
   "claimedAt": "2026-11-18T05:26:07+01:00",
   "run": "20261118-052606-nika",
-  "attempts": 1
+  "attempts": 1,
+  "reason": "step review2: name 'd' is not defined"
 }
