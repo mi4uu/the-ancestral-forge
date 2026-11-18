@@ -2,8 +2,9 @@
   "slug": "infused-oils-vs-tinctures-vs-teas",
   "engine": "lobster",
   "date": "2026-11-18",
-  "status": "claimed",
+  "status": "failed",
   "claimedAt": "2026-11-18T06:08:52+01:00",
   "run": "20261118-060850-lobster",
-  "attempts": 2
+  "attempts": 2,
+  "reason": "the lobster engine stopped before the pipeline finished (last step: imageprompt)"
 }
