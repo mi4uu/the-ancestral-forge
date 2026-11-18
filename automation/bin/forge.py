@@ -536,14 +536,15 @@ def cmd_image(a):
                 st = load(a.run)
                 st["image"] = "generated"
                 st["image_prompt"] = prompt
+                save(a.run, st)
             else:
                 why = f"ssh exit {r.returncode}: {r.stderr.decode()[:150]}"
         except Exception as e:
             why = str(e)[:200]
         st = load(a.run)
-        if why:
+        if why or "image" not in st:
             st["image"] = "fallback"
-            st["image_note"] = why
+            st["image_note"] = why or "no image produced"
         save(a.run, st)
         return {"image": st["image"], "note": why}
     out(timed(a.run, "image", go))
