@@ -2,4 +2,4 @@
 # Manual or cron trigger for the nika engine. Usage: run-nika [force]
 cd /home/mjl/forge-automation/repo/automation/nika || exit 1
 F=false; [ "${1:-}" = "force" ] && F=true
-exec /home/mjl/.nika/bin/nika run daily-article.nika --var force=$F
+exec /home/mjl/.nika/bin/nika run daily-article.nika --var force=$([ "$F" = true ] && echo 1 || echo 0)

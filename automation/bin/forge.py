@@ -180,7 +180,7 @@ def cmd_init(a):
     run_id = f"{d:%Y%m%d-%H%M%S}-{a.engine}"
     run = WORK / run_id
     run.mkdir(parents=True, exist_ok=True)
-    st = {"run_id": run_id, "engine": a.engine, "date": f"{d:%Y-%m-%d}", "force": bool(a.force), "status": "running", "steps": {}}
+    st = {"run_id": run_id, "engine": a.engine, "date": f"{d:%Y-%m-%d}", "force": bool(a.force or os.environ.get("FORGE_FORCE") == "1"), "status": "running", "steps": {}}
     save(run, st)
     out({"run": str(run), "engine": a.engine})
 
@@ -205,7 +205,14 @@ def cmd_pick(a):
         for attempt in range(6):
             git_reset_to_origin()
             CLAIMS.mkdir(parents=True, exist_ok=True)
-            claimed = {p.stem for p in CLAIMS.glob("*.json")}
+            claimed, attempts = set(), {}
+            for p in CLAIMS.glob("*.json"):
+                if p.stem.startswith("day-"):
+                    continue
+                cj = json.loads(p.read_text())
+                attempts[p.stem] = cj.get("attempts", 1)
+                if not (cj.get("status") == "failed" and cj.get("attempts", 1) < 2):
+                    claimed.add(p.stem)
             day_lock = CLAIMS / f"day-{st['date']}.json"
             if not st["force"] and day_lock.exists():
                 st["status"] = "skipped"
@@ -228,7 +235,8 @@ def cmd_pick(a):
             if not chosen:
                 raise RuntimeError("topic queue is empty or every topic is claimed or a duplicate")
             claim = {"slug": chosen["slug"], "engine": st["engine"], "date": st["date"], "status": "claimed",
-                     "claimedAt": now().isoformat(timespec="seconds"), "run": st["run_id"]}
+                     "claimedAt": now().isoformat(timespec="seconds"), "run": st["run_id"],
+                     "attempts": attempts.get(chosen["slug"], 0) + 1}
             paths = []
             c = CLAIMS / f"{chosen['slug']}.json"
             c.write_text(json.dumps(claim, indent=2))
@@ -534,6 +542,7 @@ def cmd_publish(a):
             paths.append(img)
         claim = CLAIMS / f"{st['slug']}.json"
         c = json.loads(claim.read_text()) if claim.exists() else {"slug": st["slug"], "engine": st["engine"], "date": st["date"]}
+        c.pop("reason", None)
         c.update(status="published", publishedAt=now().isoformat(timespec="seconds"), url=f"{SITE}/articles/{st['slug']}")
         claim.write_text(json.dumps(c, indent=2))
         paths.append(claim)

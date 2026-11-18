@@ -1,12 +1,97 @@
 nika: forge-daily-article
+
 inputs:
-  force: { type: boolean, default: false }
+  force: { type: string, default: "0" }
+
 permits:
   exec: ["python3"]
   fs:
-    read: ["/home/mjl", "/tmp", "/usr", "/etc", "/lib", "/bin"]
-    write: ["/home/mjl", "/tmp"]
+    read: ["/home/mjl", "/tmp", "/usr", "/etc", "/lib", "/bin", "/proc", "/dev"]
+    write: ["/home/mjl", "/tmp", "/dev"]
+
 tasks:
   init:
     exec:
       command: ["python3", "/home/mjl/forge-automation/repo/automation/bin/forge.py", "init", "--engine", "nika"]
+      env: { FORGE_FORCE: "${{ inputs.force }}" }
+    timeout: "2m"
+
+  pick:
+    with:
+      run: ${{ tasks.init.output.run }}
+    after: { init: success }
+    exec:
+      command: ["python3", "/home/mjl/forge-automation/repo/automation/bin/forge.py", "pick", "--run", "${{ with.run }}"]
+    timeout: "5m"
+
+  research:
+    with:
+      run: ${{ tasks.init.output.run }}
+    after: { pick: success }
+    exec:
+      command: ["python3", "/home/mjl/forge-automation/repo/automation/bin/forge.py", "research", "--run", "${{ with.run }}"]
+    timeout: "40m"
+
+  outline:
+    with:
+      run: ${{ tasks.init.output.run }}
+    after: { research: success }
+    exec:
+      command: ["python3", "/home/mjl/forge-automation/repo/automation/bin/forge.py", "outline", "--run", "${{ with.run }}"]
+    timeout: "25m"
+
+  draft:
+    with:
+      run: ${{ tasks.init.output.run }}
+    after: { outline: success }
+    exec:
+      command: ["python3", "/home/mjl/forge-automation/repo/automation/bin/forge.py", "draft", "--run", "${{ with.run }}"]
+    timeout: "25m"
+
+  review1:
+    with:
+      run: ${{ tasks.init.output.run }}
+    after: { draft: success }
+    exec:
+      command: ["python3", "/home/mjl/forge-automation/repo/automation/bin/forge.py", "review1", "--run", "${{ with.run }}"]
+    timeout: "25m"
+
+  revise:
+    with:
+      run: ${{ tasks.init.output.run }}
+    after: { review1: success }
+    exec:
+      command: ["python3", "/home/mjl/forge-automation/repo/automation/bin/forge.py", "revise", "--run", "${{ with.run }}"]
+    timeout: "25m"
+
+  review2:
+    with:
+      run: ${{ tasks.init.output.run }}
+    after: { revise: success }
+    exec:
+      command: ["python3", "/home/mjl/forge-automation/repo/automation/bin/forge.py", "review2", "--run", "${{ with.run }}"]
+    timeout: "25m"
+
+  image:
+    with:
+      run: ${{ tasks.init.output.run }}
+    after: { review2: success }
+    exec:
+      command: ["python3", "/home/mjl/forge-automation/repo/automation/bin/forge.py", "image", "--run", "${{ with.run }}"]
+    timeout: "25m"
+
+  publish:
+    with:
+      run: ${{ tasks.init.output.run }}
+    after: { image: success }
+    exec:
+      command: ["python3", "/home/mjl/forge-automation/repo/automation/bin/forge.py", "publish", "--run", "${{ with.run }}"]
+    timeout: "5m"
+
+  notify:
+    with:
+      run: ${{ tasks.init.output.run }}
+    after: { publish: success }
+    exec:
+      command: ["python3", "/home/mjl/forge-automation/repo/automation/bin/forge.py", "notify", "--run", "${{ with.run }}"]
+    timeout: "25m"

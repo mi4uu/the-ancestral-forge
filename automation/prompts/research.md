@@ -5,7 +5,7 @@ Angle: {{ANGLE}}
 Category: {{CATEGORY}}
 Safety class: {{SAFETY}}
 
-Use web_search and web_fetch. Find at least 4 real sources and open each one you cite. Prefer: university extension services, government agencies (USDA, NCHFP, FDA, NIH, EFSA, national food safety bodies), peer-reviewed reviews, established botanical or horticultural institutions, well-regarded practitioner books. Avoid content farms, supplement sellers and forums as factual sources.
+Write everything in English. Use web_search and web_fetch. Find at least 4 real sources and open each one you cite. Prefer: university extension services, government agencies (USDA, NCHFP, FDA, NIH, EFSA, national food safety bodies), peer-reviewed reviews, established botanical or horticultural institutions, well-regarded practitioner books. Avoid content farms, supplement sellers and forums as factual sources.
 
 Return a dossier in Markdown, nothing else:
 
