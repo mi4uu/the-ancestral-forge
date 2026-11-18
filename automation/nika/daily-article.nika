@@ -12,7 +12,7 @@ permits:
   net:
     http: ["github.com"]
   fs:
-    read: ["/home/mjl", "/home/mjl/forge-automation/**", "/etc/passwd", "/etc/group", "/etc/hosts", "/run/systemd/resolve/stub-resolv.conf", "/etc/nsswitch.conf", "/etc/ssl", "/etc/ca-certificates", "/usr/share/zoneinfo/Europe/Warsaw", "/etc/ld.so.cache", "/etc/gai.conf", "/etc/host.conf", "/etc/ssh", "/etc/ca-certificates.conf", "/etc/hostname", "/etc/alternatives", "/etc/mime.types"]
+    read: ["/home/mjl", "/home/mjl/forge-automation/**", "/etc/passwd", "/etc/group", "/etc/hosts", "/run/systemd/resolve/stub-resolv.conf", "/etc/nsswitch.conf", "/etc/ssl", "/etc/ssl/**", "/usr/share/ca-certificates/**", "/etc/ca-certificates", "/usr/share/zoneinfo/Europe/Warsaw", "/etc/ld.so.cache", "/etc/gai.conf", "/etc/host.conf", "/etc/ssh", "/etc/ca-certificates.conf", "/etc/hostname", "/etc/alternatives", "/etc/mime.types"]
     write: ["/home/mjl/forge-automation", "/home/mjl/forge-automation/**", "/home/mjl/.openclaw", "/home/mjl/.cache"]
 
 tasks:

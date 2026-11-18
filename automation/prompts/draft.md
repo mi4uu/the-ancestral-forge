@@ -19,7 +19,7 @@ Topic: {{TITLE}}
 Angle: {{ANGLE}}
 Safety class: {{SAFETY}}
 
-The body (without frontmatter and the Sources list) must be 1,400 to 1,800 words: about 200 words for each of 7 or 8 sections. Count as you go; a short draft will be sent back.
+The body (without frontmatter and the Sources list) must be 1,500 to 1,900 words: about 230 words for each of 7 or 8 sections. Drafts tend to come out about 20% short, so aim high. Count as you go; a short draft will be sent back.
 
 The dossier uses bracket numbers [1] for its own bookkeeping: do not copy them into the article. Name sources in the sentence instead.
 

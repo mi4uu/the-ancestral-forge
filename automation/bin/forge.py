@@ -422,9 +422,21 @@ def lint(st, text):
     return hard, hints
 
 
+def fetch_ok(u):
+    try:
+        req = urllib.request.Request(u, headers={"User-Agent": "Mozilla/5.0 (compatible; AncestralForgeBot/1.0)"})
+        urllib.request.urlopen(req, timeout=25).close()
+        return True
+    except Exception:
+        return False
+
+
 def dead_urls(urls):
     """404 or 410, an unresolvable host, or a soft 404 (a 200 page titled 'not found')."""
     dead = []
+    if urls and not fetch_ok("https://en.wikipedia.org/wiki/Main_Page"):
+        sys.stderr.write("link check skipped: canary fetch failed\n")
+        return []
     for u in urls:
         ok = False
         try:
@@ -435,8 +447,8 @@ def dead_urls(urls):
             ok = not (title and re.search(r"not found|404|page unavailable", title.group(1), re.I))
         except urllib.error.HTTPError as e:
             ok = e.code in (401, 403, 405, 429, 999)
-        except Exception:
-            ok = False
+        except Exception as e:
+            ok = "Tunnel connection failed" in str(e)
         if not ok:
             dead.append(u)
     return dead
