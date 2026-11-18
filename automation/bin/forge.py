@@ -666,7 +666,8 @@ def cmd_notify(a):
     if not a.no_wait:
         for _ in range(40):
             try:
-                if urllib.request.urlopen(st["url"], timeout=15).status == 200:
+                req = urllib.request.Request(st["url"], headers={"User-Agent": "Mozilla/5.0 (compatible; AncestralForgeBot/1.0)"})
+                if urllib.request.urlopen(req, timeout=15).status == 200:
                     live = True
                     break
             except Exception:
