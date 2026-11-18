@@ -2,8 +2,9 @@
   "slug": "toxic-plants-in-the-home-garden",
   "engine": "local",
   "date": "2026-11-18",
-  "status": "claimed",
+  "status": "failed",
   "claimedAt": "2026-11-18T07:54:20+01:00",
   "run": "20261118-075419-local",
-  "attempts": 2
+  "attempts": 2,
+  "reason": "step draft: draft has no frontmatter"
 }
