@@ -1,12 +1,9 @@
 {
   "slug": "lemon-balm-and-mint-tea-garden",
-  "engine": "nika",
+  "engine": "lobster",
   "date": "2026-11-18",
-  "status": "failed",
-  "claimedAt": "2026-11-18T05:46:56+01:00",
-  "run": "20261118-054655-nika",
-  "attempts": 1,
-  "publishedAt": "2026-11-18T05:55:07+01:00",
-  "url": "https://ancestralforge.org/articles/lemon-balm-and-mint-tea-garden",
-  "reason": "test article parked: source talk in copy"
+  "status": "claimed",
+  "claimedAt": "2026-11-18T05:56:53+01:00",
+  "run": "20261118-055651-lobster",
+  "attempts": 2
 }
