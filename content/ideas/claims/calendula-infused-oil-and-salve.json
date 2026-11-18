@@ -2,8 +2,9 @@
   "slug": "calendula-infused-oil-and-salve",
   "engine": "lobster",
   "date": "2026-11-18",
-  "status": "claimed",
+  "status": "failed",
   "claimedAt": "2026-11-18T04:56:42+01:00",
   "run": "20261118-045640-lobster",
-  "attempts": 1
+  "attempts": 1,
+  "reason": "still revise after one revision: Under '## Making the beeswax salve', the sentence 'Let it cool completely before putting on the lid.' is cited to [4]. The Herbal Academy page only says 'Let cool comp"
 }
