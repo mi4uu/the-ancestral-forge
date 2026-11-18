@@ -2,9 +2,8 @@
   "slug": "comfrey-garden-workhorse",
   "engine": "local",
   "date": "2026-11-18",
-  "status": "failed",
-  "claimedAt": "2026-11-18T07:44:15+01:00",
-  "run": "20261118-074413-local",
-  "attempts": 1,
-  "reason": "step draft: local model returned no text"
+  "status": "claimed",
+  "claimedAt": "2026-11-18T07:50:24+01:00",
+  "run": "20261118-075022-local",
+  "attempts": 2
 }
