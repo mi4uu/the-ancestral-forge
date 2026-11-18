@@ -2,11 +2,10 @@
   "slug": "yarrow-field-guide-and-lookalikes",
   "engine": "lobster",
   "date": "2026-11-18",
-  "status": "failed",
+  "status": "published",
   "claimedAt": "2026-11-18T06:19:24+01:00",
   "run": "20261118-061922-lobster",
   "attempts": 1,
   "publishedAt": "2026-11-18T06:29:56+01:00",
-  "url": "https://ancestralforge.org/articles/yarrow-field-guide-and-lookalikes",
-  "reason": "step draft: agent redaktor bad output: [openclaw] The CLI command failed.\n[openclaw] For help, run `openclaw doctor`.\n"
+  "url": "https://ancestralforge.org/articles/yarrow-field-guide-and-lookalikes"
 }

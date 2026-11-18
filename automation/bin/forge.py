@@ -92,6 +92,8 @@ def fail(run, reason, release=True):
             claim = CLAIMS / f"{st['slug']}.json"
             if claim.exists():
                 c = json.loads(claim.read_text())
+                if c.get("status") == "published":
+                    raise RuntimeError("claim already published, left alone")
                 c["status"] = "failed"
                 c["reason"] = reason[:200]
                 claim.write_text(json.dumps(c, indent=2))
