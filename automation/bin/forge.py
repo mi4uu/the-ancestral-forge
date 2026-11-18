@@ -444,7 +444,12 @@ def do_review(run, round_):
     d = Path(run)
     draft = (d / "draft.md").read_text()
     lint_issues, lint_hints = lint(st, draft)
-    prompt = fill((PROMPTS / "review.md").read_text(), st, DOSSIER=(d / "research.md").read_text(), DRAFT=draft)
+    note = ("Round 1: list every issue you find, most important first." if round_ == 1 else
+            "Round 2, the final round after one revision. Return \"pass\" unless a safety breach, an unsupported or wrongly attributed factual claim, "
+            "a missing required element (Sources, Safety section, Not medical advice box) or a hard style violation (em dash, banned word) remains. "
+            "Remaining style nits, repetition or taste are NOT grounds to reject or revise: mention them in issues but still pass. "
+            "Only \"reject\" for a real safety or fact problem.")
+    prompt = fill((PROMPTS / "review.md").read_text(), st, DOSSIER=(d / "research.md").read_text(), DRAFT=draft, ROUND_NOTE=note)
     if lint_issues:
         prompt += "\n\nAutomated lint found these hard problems (confirm and include them): " + "; ".join(lint_issues)
     if lint_hints:
@@ -504,6 +509,8 @@ def cmd_review2(a):
         if not st.get("revised"):
             return {"verdict": st.get("verdict1"), "skipped": True}
         v = do_review(a.run, 2)
+        if v["verdict"] == "revise":
+            v["verdict"] = "reject" if v["issues"] and lint(st, (d / "draft.md").read_text())[0] else "pass"
         if v["verdict"] != "pass":
             fail(a.run, f"still {v['verdict']} after one revision: " + "; ".join(v["issues"][:3]))
         return {"verdict": "pass"}

@@ -8,6 +8,8 @@ Checklist:
 3. STYLE: Australian spelling; no em dashes and no " -- "; none of the banned words (genuinely, extraordinary, significantly, straightforward, crucial, comprehensive as filler, foster, navigate as metaphor, streamline, empower, elevate, facilitate, harness, underscore, nuanced, realm, multifaceted, moreover, furthermore, additionally as openers, in conclusion, to summarise, it's worth noting, delve, landscape as metaphor, paradigm, robust, leverage, synergy, holistic, ecosystem outside biology, pivotal, groundbreaking, cutting-edge, seamless, utilise, tapestry, unlock); no "this is not X, it is Y" pattern; varied rhythm; contractions; no invented personal anecdotes.
 4. FORMAT: frontmatter has title, category, tags, author, authorRole, date, readTime, excerpt, illustration, heroImage, featured, free, sources; body 1,200 to 2,000 words; has `## Sources`.
 
+{{ROUND_NOTE}}
+
 Verdict rules: "reject" if any safety breach, fabricated sources or facts, or the piece is unfixable. "revise" if there are fixable problems (list them; max one revision round is allowed). "pass" only if nothing material is left.
 
 Reply with ONLY this JSON, no fences, no other text:
