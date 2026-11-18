@@ -9,7 +9,7 @@ writes files in a run directory and prints one JSON object on stdout.
     forge.py pick|research|outline|draft|review1|revise|review2|image|publish|notify --run DIR
     forge.py fail --run DIR --reason TEXT
 """
-import fcntl, argparse, datetime, difflib, json, os, random, re, subprocess, sys, time, urllib.request
+import fcntl, argparse, datetime, difflib, json, os, random, re, subprocess, sys, time, urllib.request, urllib.error
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
@@ -47,6 +47,7 @@ BANNED = ["genuinely", "extraordinary", "significantly", "straightforward", "cru
           "it's important to note", "delve", "paradigm", "synergy", "pivotal",
           "groundbreaking", "cutting-edge", "seamless", "utilise", "utilize", "tapestry", "game-changer"]
 SOFT_BANNED = ["foster", "realm", "leverage", "unlock", "holistic", "landscape", "robust", "harness", "navigate"]
+EM = chr(0x2014)
 MED_BOX = "**Not medical advice.**"
 
 
@@ -390,11 +391,16 @@ def lint(st, text):
     """Returns (hard, hints). Hard issues force a revision; hints go to the reviewer, who decides."""
     fm, body = split_article(text)
     hard, hints = [], []
-    if "\u2014" in text:
+    if EM in text:
         hard.append("em dash found")
     if " -- " in text:
         hard.append("double hyphen used as dash")
     low = body.lower()
+    n = len(body.split("\n## Sources")[0].split())
+    if n < 1150 or n > 2100:
+        hard.append(f"body is {n} words; it must be 1,200 to 2,000 (keep it between 1,300 and 1,900)")
+    for u in dead_urls(urls_in(body.split("## Sources")[-1]) if "## Sources" in body else []):
+        hard.append(f"dead source link (returns 404 or does not resolve): {u}; replace it with a live page that says the same thing, or drop that source and every claim only it supports")
     for w in BANNED:
         if re.search(rf"\b{re.escape(w)}\b", low):
             hard.append(f"banned word: {w}")
@@ -414,6 +420,26 @@ def lint(st, text):
     if len(re.findall(r"\bit is\b", low)) > 6:
         hints.append("many uncontracted 'it is'")
     return hard, hints
+
+
+def dead_urls(urls):
+    """404 or 410, an unresolvable host, or a soft 404 (a 200 page titled 'not found')."""
+    dead = []
+    for u in urls:
+        ok = False
+        try:
+            req = urllib.request.Request(u, headers={"User-Agent": "Mozilla/5.0 (compatible; AncestralForgeBot/1.0)"})
+            with urllib.request.urlopen(req, timeout=25) as r:
+                head = r.read(60000).decode("utf-8", "ignore")
+            title = re.search(r"<title[^>]*>([\s\S]*?)</title>", head, re.I)
+            ok = not (title and re.search(r"not found|404|page unavailable", title.group(1), re.I))
+        except urllib.error.HTTPError as e:
+            ok = e.code in (401, 403, 405, 429, 999)
+        except Exception:
+            ok = False
+        if not ok:
+            dead.append(u)
+    return dead
 
 
 def cmd_draft(a):
@@ -566,7 +592,15 @@ def cmd_publish(a):
         st = load(a.run)
         d = Path(a.run)
         article, wc, srcs = normalise(a.run, (d / "draft.md").read_text())
-        assert "—" not in article, "em dash in final article"
+        gone = dead_urls(srcs)
+        if gone:
+            kept = [l for l in article.split("\n") if not any(u in l for u in gone)]
+            article = "\n".join(kept)
+            srcs = [u for u in srcs if u not in gone]
+            st = load(a.run)
+            st["dropped_dead_sources"] = gone
+            save(a.run, st)
+        assert EM not in article, "em dash in final article"
         assert len(srcs) >= 3
         git_reset_to_origin()
         target = ARTICLES / st["slug"]
