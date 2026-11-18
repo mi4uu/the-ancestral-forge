@@ -316,7 +316,8 @@ def local_call(path, payload=None, timeout=60, method=None):
 def local_chat(run, step, message, timeout=900):
     system = (AUTO / "agents" / "redaktor-AGENTS.md").read_text()
     (Path(run) / f"{step}.prompt.txt").write_text(message)
-    j = local_call("/v1/chat/completions", {"model": LOCAL_MODEL, "temperature": 0.7, "max_tokens": 12000,
+    model = "ornith:nothink" if step.startswith("revise") else LOCAL_MODEL
+    j = local_call("/v1/chat/completions", {"model": model, "temperature": 0.7, "max_tokens": 16000,
                    "messages": [{"role": "system", "content": system}, {"role": "user", "content": message}]}, timeout=timeout)
     text = re.sub(r"<think>[\s\S]*?</think>", "", j["choices"][0]["message"].get("content") or "").strip()
     if not text:
@@ -324,7 +325,7 @@ def local_chat(run, step, message, timeout=900):
     st = load(run)
     stp = st["steps"].setdefault(step, {})
     stp["tokens"] = (j.get("usage") or {}).get("total_tokens")
-    stp["model"] = "local/" + LOCAL_MODEL
+    stp["model"] = "local/" + model
     save(run, st)
     (Path(run) / f"{step}.out.txt").write_text(text)
     return text
@@ -429,7 +430,11 @@ def fm_get(fm, key):
 def normalise(run, text):
     """Rebuild the frontmatter from script-owned fields so the site never gets a malformed header."""
     st = load(run)
-    fm, body = split_article(strip_fences(text))
+    text = strip_fences(text)
+    starts = [m.start() for m in re.finditer(r"(?m)^---[ \t]*\n+title:", text)]
+    if starts:
+        text = text[starts[-1]:]
+    fm, body = split_article(text)
     body = re.sub(r"^# .+\n+", "", body)
     wc = len(re.findall(r"\b[\w'’-]+\b", re.sub(r"\(https?://[^)]+\)|https?://\S+", "", body.split("\n## Sources")[0])))
     tags = fm_get(fm, "tags").strip("[]")
