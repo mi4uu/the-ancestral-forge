@@ -118,7 +118,12 @@ def git_reset_to_origin():
 
 def git_sync_push(message, paths, tries=4):
     """Commit paths and push. On a lost race, drop the unpushed commit, re-apply the files and retry."""
-    snapshot = {str(p): (Path(p).read_bytes() if Path(p).exists() else None) for p in paths}
+    snapshot = {}
+    for p in paths:
+        p = Path(p)
+        files = [q for q in p.rglob("*") if q.is_file()] if p.is_dir() else [p]
+        for q in files:
+            snapshot[str(q)] = q.read_bytes() if q.exists() else None
     for attempt in range(tries):
         sh(["git", "add", "-A", "--"] + [str(p) for p in paths])
         sh(["git", "commit", "-q", "-m", message])
