@@ -2,11 +2,8 @@
   "slug": "wild-foraging-ground-rules",
   "engine": "nika",
   "date": "2026-11-18",
-  "status": "failed",
-  "claimedAt": "2026-11-18T05:30:34+01:00",
-  "run": "20261118-053032-nika",
-  "attempts": 1,
-  "publishedAt": "2026-11-18T05:38:51+01:00",
-  "url": "https://ancestralforge.org/articles/wild-foraging-ground-rules",
-  "reason": "test article parked in content/review (dead source link, short body)"
+  "status": "claimed",
+  "claimedAt": "2026-11-18T05:42:08+01:00",
+  "run": "20261118-054207-nika",
+  "attempts": 2
 }
