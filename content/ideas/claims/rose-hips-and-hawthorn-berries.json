@@ -2,9 +2,8 @@
   "slug": "rose-hips-and-hawthorn-berries",
   "engine": "local",
   "date": "2026-11-18",
-  "status": "failed",
-  "claimedAt": "2026-11-18T07:57:57+01:00",
-  "run": "20261118-075756-local",
-  "attempts": 1,
-  "reason": "reviewer rejected the draft: The piece is missing the mandatory 'Not medical advice' box on an herbal topic (a safety breach), the title and excerpt promise things the sources do not support, and the "
+  "status": "claimed",
+  "claimedAt": "2026-11-18T08:01:54+01:00",
+  "run": "20261118-080153-local",
+  "attempts": 2
 }
