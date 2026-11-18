@@ -1,0 +1,5 @@
+#!/bin/bash
+# Manual or cron trigger for the Lobster engine. Usage: run-lobster [force]
+MSG="Run the daily article with Lobster."
+[ "${1:-}" = "force" ] && MSG="$MSG force"
+exec openclaw agent --agent forgerun --session-key "forge:lobster:$(date +%Y%m%d-%H%M%S)" --message "$MSG" --timeout 3300 --json

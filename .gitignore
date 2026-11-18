@@ -5,3 +5,6 @@ data/
 video/*/output/
 video/manim-scenes/media/
 __pycache__/
+
+automation/work/
+automation/logs/

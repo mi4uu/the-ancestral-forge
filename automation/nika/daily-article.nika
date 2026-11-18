@@ -1,0 +1,12 @@
+nika: forge-daily-article
+inputs:
+  force: { type: boolean, default: false }
+permits:
+  exec: ["python3"]
+  fs:
+    read: ["/home/mjl", "/tmp", "/usr", "/etc", "/lib", "/bin"]
+    write: ["/home/mjl", "/tmp"]
+tasks:
+  init:
+    exec:
+      command: ["python3", "/home/mjl/forge-automation/repo/automation/bin/forge.py", "init", "--engine", "nika"]
