@@ -8,6 +8,7 @@ writes files in a run directory and prints one JSON object on stdout.
     forge.py init --engine lobster [--force]
     forge.py pick|research|outline|draft|review1|revise|review2|image|publish|notify --run DIR
     forge.py fail --run DIR --reason TEXT
+    forge.py indexnow [--all] [--url URL ...]
 """
 import fcntl, argparse, datetime, difflib, json, os, random, re, subprocess, sys, time, urllib.request, urllib.error
 from pathlib import Path
@@ -22,6 +23,7 @@ CLAIMS = ROOT / "content" / "ideas" / "claims"
 QUEUE = ROOT / "content" / "ideas" / "queue.md"
 ARTICLES = ROOT / "content" / "articles"
 SITE = "https://ancestralforge.org"
+INDEXNOW_KEY = "14f41ddc80034fe7e3666cdd63395294"
 TG_TARGET = "1689167409"
 OPENCLAW = os.environ.get("OPENCLAW_BIN", "openclaw")
 SSH_IMG = ["ssh", "-F", "/dev/null", "-i", os.path.expanduser("~/.ssh/forge_img"), "-o", "IdentitiesOnly=yes", "-o", "BatchMode=yes",
@@ -427,6 +429,50 @@ def fm_get(fm, key):
     return m.group(1).strip().strip('"').strip("'") if m else ""
 
 
+def move_med_box(body):
+    """Put the 'Not medical advice' box right before the first H2, so the intro keeps the hook. Idempotent."""
+    lines = body.split("\n")
+    box = next((i for i, l in enumerate(lines) if l.startswith("> ") and MED_BOX in l), None)
+    h2 = next((i for i, l in enumerate(lines) if l.startswith("## ")), None)
+    if box is None or h2 is None:
+        return body
+    text = lines[box]
+    rest = lines[:box] + lines[box + 1:]
+    h2 = next(i for i, l in enumerate(rest) if l.startswith("## "))
+    head, tail = rest[:h2], rest[h2:]
+    while head and not head[-1].strip():
+        head.pop()
+    out_lines = head + ["", text, ""] + tail
+    res = "\n".join(out_lines)
+    return re.sub(r"\n{3,}", "\n\n", res)
+
+
+def indexnow(urls):
+    """Tell IndexNow engines (Bing and others) about new URLs. Never fatal."""
+    urls = list(dict.fromkeys(urls))
+    if not urls:
+        return {"ok": False, "status": None, "n": 0}
+    payload = json.dumps({"host": SITE.split("//")[1], "key": INDEXNOW_KEY,
+                          "keyLocation": f"{SITE}/{INDEXNOW_KEY}.txt", "urlList": urls}).encode()
+    req = urllib.request.Request("https://api.indexnow.org/indexnow", data=payload,
+                                 headers={"Content-Type": "application/json; charset=utf-8"})
+    try:
+        status = urllib.request.urlopen(req, timeout=30).status
+    except urllib.error.HTTPError as e:
+        status = e.code
+    except Exception:
+        status = None
+    return {"ok": status in (200, 202), "status": status, "n": len(urls)}
+
+
+def cmd_indexnow(a):
+    urls = [f"{SITE}/"] if a.all else []
+    if a.all:
+        urls += [f"{SITE}/articles/{d.name}" for d in sorted(ARTICLES.iterdir()) if (d / "index.md").exists()]
+    urls += a.url or []
+    out(indexnow(urls))
+
+
 def normalise(run, text):
     """Rebuild the frontmatter from script-owned fields so the site never gets a malformed header."""
     st = load(run)
@@ -436,6 +482,7 @@ def normalise(run, text):
         text = text[starts[-1]:]
     fm, body = split_article(text)
     body = re.sub(r"^# .+\n+", "", body)
+    body = move_med_box(body)
     wc = len(re.findall(r"\b[\w'’-]+\b", re.sub(r"\(https?://[^)]+\)|https?://\S+", "", body.split("\n## Sources")[0])))
     tags = fm_get(fm, "tags").strip("[]")
     title = fm_get(fm, "title") or st["title"]
@@ -750,6 +797,8 @@ def cmd_notify(a):
                 pass
             time.sleep(30)
     st["status"] = "published"
+    pinged = indexnow([st["url"], f"{SITE}/"]) if live else {"ok": False, "status": "not live yet"}
+    st["indexnow"] = pinged
     toks = sum((s.get("tokens") or 0) for s in st["steps"].values())
     secs = round(sum((s.get("seconds") or 0) for s in st["steps"].values()))
     st["total_tokens"], st["total_seconds"] = toks, secs
@@ -760,7 +809,7 @@ def cmd_notify(a):
     telegram(f"The Ancestral Forge [{st['engine']}, {st.get('author', '')}]: published{rev}, {'free' if st.get('free') else 'members only'}\n{st['title']}\n{st['url']}\n"
              f"{'Live now.' if live else 'Goes live within 15 min (server pulls from git).'}"
              f"\n{st.get('words')} words, {secs // 60} min, {toks} tokens{note}")
-    out({"ok": True, "url": st["url"], "live": live, "seconds": secs, "tokens": toks})
+    out({"ok": True, "url": st["url"], "live": live, "indexnow": pinged, "seconds": secs, "tokens": toks})
 
 
 def cmd_finalize(a):
@@ -797,6 +846,9 @@ def main():
     f.add_argument("--engine", required=True)
     f.add_argument("--since", required=True)
     f.add_argument("--note", default="")
+    n = sub.add_parser("indexnow")
+    n.add_argument("--all", action="store_true")
+    n.add_argument("--url", action="append")
     for name in ("pick", "research", "outline", "draft", "review1", "revise", "review2", "image", "publish", "notify", "fail"):
         s = sub.add_parser(name)
         s.add_argument("--run", default=os.environ.get("RUN"), required=False)
@@ -805,9 +857,9 @@ def main():
         if name == "notify":
             s.add_argument("--no-wait", action="store_true")
     a = p.parse_args()
-    if a.cmd not in ("init", "finalize") and not a.run:
+    if a.cmd not in ("init", "finalize", "indexnow") and not a.run:
         p.error("--run or $RUN required")
-    if a.cmd not in ("init", "pick", "fail", "finalize") and load(a.run).get("status") == "skipped":
+    if a.cmd not in ("init", "pick", "fail", "finalize", "indexnow") and load(a.run).get("status") == "skipped":
         out({"skipped": True})
         return
     globals()["cmd_" + a.cmd](a)

@@ -19,9 +19,9 @@ sources:
 
 A handful of herbs can become a cup of tea, an alcohol-based tincture or an infused oil. The plant may be the same, but the solvent and preparation method shape the finished product. That difference matters when handling fresh material and deciding how to store what you’ve made.
 
-> **Not medical advice.** This article is for general information only. It does not diagnose or treat anything. Talk to a qualified health professional before using any herb or remedy, especially if you are pregnant, breastfeeding, on medication or have a medical condition.
-
 The preparations have different uses and handling needs. This comparison covers how they are made and what to watch for, not dosing or treatment. Check cautions and interactions for the exact herb and intended use.
+
+> **Not medical advice.** This article is for general information only. It does not diagnose or treat anything. Talk to a qualified health professional before using any herb or remedy, especially if you are pregnant, breastfeeding, on medication or have a medical condition.
 
 ## Three preparations, three solvents
 

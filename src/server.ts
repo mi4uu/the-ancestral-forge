@@ -1,6 +1,6 @@
 import { Elysia } from "elysia";
 import { staticPlugin } from "@elysiajs/static";
-import { loadArticles, loadArticle } from "./content";
+import { loadArticles } from "./content";
 import { getConfig } from "./config";
 import { renderHome, renderArticle, renderListing, renderSearch, renderLogin, render404, renderUnsubscribe } from "./templates";
 import { getSession, destroySession, createSession, SESSION_COOKIE_NAME } from "./auth/sessions";
@@ -9,6 +9,7 @@ import { generateMagicToken, verifyMagicToken, sendMagicLinkEmail } from "./auth
 import { checkMembership } from "./auth/bmac";
 import { getComments, addComment, deleteComment } from "./community/storage";
 import { isArticleGated } from "./vault/paywall";
+import { clientIp, isVerifiedSearchBot, INDEXNOW_KEY } from "./seo";
 import { addSubscriber, sendWelcomeEmail, getSubscriberCount, verifyUnsubscribeToken, removeSubscriber } from "./newsletter/subscribers";
 
 const html = (body: string, status = 200) =>
@@ -25,11 +26,15 @@ const app = new Elysia()
 
   // ── Article ──────────────────────────────────────────────────
   .get("/articles/:slug", async ({ params, headers: reqHeaders }) => {
-    const article = await loadArticle(params.slug);
+    const all = await loadArticles();
+    const article = all.find((a) => a.slug === params.slug);
     if (!article) return html(render404(), 404);
     const user = await getUserContext(reqHeaders["cookie"]);
     const comments = await getComments(params.slug);
-    return html(renderArticle(article, user, comments));
+    const crawler = isArticleGated(article) && (await isVerifiedSearchBot(clientIp(reqHeaders), reqHeaders["user-agent"]));
+    const res = html(renderArticle(article, user, comments, all, crawler));
+    if (isArticleGated(article)) res.headers.set("Cache-Control", "private, no-store");
+    return res;
   })
 
   // ── Unsubscribe ─────────────────────────────────────────────
@@ -45,7 +50,7 @@ const app = new Elysia()
   // ── Archive (all articles) ──────────────────────────────────
   .get("/archive", async () => {
     const articles = await loadArticles();
-    return html(renderListing("Archive", articles));
+    return html(renderListing("Archive", articles, "/archive"));
   })
 
   // ── Category pages ──────────────────────────────────────────
@@ -54,14 +59,14 @@ const app = new Elysia()
     const filtered = articles.filter((a) => a.category === params.slug);
     const cfg = getConfig();
     const cat = cfg.categories.find((c) => c.slug === params.slug);
-    return html(renderListing(cat?.name || params.slug, filtered));
+    return html(renderListing(cat?.name || params.slug, filtered, `/category/${params.slug}`));
   })
 
   // ── Tag pages ───────────────────────────────────────────────
   .get("/tag/:slug", async ({ params }) => {
     const articles = await loadArticles();
     const filtered = articles.filter((a) => a.tags.includes(params.slug));
-    return html(renderListing(`Tag: ${params.slug}`, filtered));
+    return html(renderListing(`Tag: ${params.slug}`, filtered, `/tag/${params.slug}`));
   })
 
   // ── Search ──────────────────────────────────────────────────
@@ -130,8 +135,8 @@ const app = new Elysia()
   })
 
   // ── IndexNow key verification ──────────────────────────────
-  .get("/14f41ddc80034fe7e3666cdd63395294.txt", () => {
-    return new Response("14f41ddc80034fe7e3666cdd63395294", { headers: { "Content-Type": "text/plain" } });
+  .get(`/${INDEXNOW_KEY}.txt`, () => {
+    return new Response(INDEXNOW_KEY, { headers: { "Content-Type": "text/plain" } });
   })
 
   // ── Auth: Login page ────────────────────────────────────────

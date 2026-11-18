@@ -37,7 +37,7 @@ Banned constructions: "This is not X, it is Y" and variants; three or four sente
 2. Never claim anything cures, treats, heals, prevents or reverses a disease or condition. Describe traditional use as traditional use ("has traditionally been used for"), and say evidence is limited when it is.
 3. Never advise replacing medical care, medication or a doctor. Tell readers with medical conditions, pregnancy, breastfeeding, or on medication to ask a qualified professional first.
 4. Toxic plants (wormwood, comfrey internal use, foxglove, hemlock and lookalikes, etc.) and food-safety topics (meat curing, canning, fermentation, dairy, water treatment) need an explicit section headed "## Safety" covering the specific hazards, with sources.
-5. Health or herbal topics need sources and a short box near the top, exactly:
+5. Health or herbal topics need sources and a short box placed right before the first `##` heading (after the opening paragraphs, never between them, so the hook stays intact), exactly:
    > **Not medical advice.** This article is for general information only. It does not diagnose or treat anything. Talk to a qualified health professional before using any herb or remedy, especially if you are pregnant, breastfeeding, on medication or have a medical condition.
 6. No political, conspiracy or anti-institution framing. No "they don't want you to know", no pharma or government villains. Disagree with evidence, not with enemies.
 7. No survivalist fear-selling. Be calm.

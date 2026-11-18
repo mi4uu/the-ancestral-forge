@@ -5,6 +5,7 @@ import type { UserContext } from "./auth/middleware";
 import type { Comment } from "./community/storage";
 import { sanitizeComment, sanitizeDisplayName } from "./community/safety";
 import { isArticleGated, canUserAccessArticle } from "./vault/paywall";
+import { absUrl, escAttr, jsonLdScript, websiteJsonLd, articleJsonLd, relatedArticles, DEFAULT_OG_IMAGE, PAYWALL_SELECTOR } from "./seo";
 
 const cfg = getConfig();
 const P = cfg.palette;
@@ -16,6 +17,11 @@ interface SeoMeta {
   ogTitle?: string;
   ogDescription?: string;
   ogImage?: string;
+  path?: string;
+  type?: "website" | "article";
+  jsonLd?: unknown[];
+  noindex?: boolean;
+  publishedTime?: string;
 }
 
 function head(titleOrMeta: string | SeoMeta) {
@@ -23,7 +29,9 @@ function head(titleOrMeta: string | SeoMeta) {
   const desc = meta.description || cfg.description;
   const ogTitle = meta.ogTitle || meta.title;
   const ogDesc = meta.ogDescription || desc;
-  const ogImage = meta.ogImage || "";
+  const ogImage = absUrl(meta.ogImage || DEFAULT_OG_IMAGE);
+  const canonical = meta.path !== undefined ? absUrl(meta.path) : "";
+  const e = escAttr;
 
   return `<!doctype html>
 <html lang="en">
@@ -33,10 +41,17 @@ function head(titleOrMeta: string | SeoMeta) {
 <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-715YXLJX2J');</script>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>${meta.title}</title>
-<meta name="description" content="${desc}"/>
-<meta property="og:title" content="${ogTitle}"/>
-<meta property="og:description" content="${ogDesc}"/>
-${ogImage ? `<meta property="og:image" content="${ogImage}"/>` : ""}
+<meta name="description" content="${e(desc)}"/>
+${meta.noindex ? `<meta name="robots" content="noindex,follow"/>\n` : ""}${canonical ? `<link rel="canonical" href="${e(canonical)}"/>\n<meta property="og:url" content="${e(canonical)}"/>\n` : ""}<meta property="og:site_name" content="${e(cfg.name)}"/>
+<meta property="og:type" content="${meta.type || "website"}"/>
+<meta property="og:title" content="${e(ogTitle)}"/>
+<meta property="og:description" content="${e(ogDesc)}"/>
+<meta property="og:image" content="${e(ogImage)}"/>
+${meta.publishedTime ? `<meta property="article:published_time" content="${e(meta.publishedTime)}"/>\n` : ""}<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:title" content="${e(ogTitle)}"/>
+<meta name="twitter:description" content="${e(ogDesc)}"/>
+<meta name="twitter:image" content="${e(ogImage)}"/>
+${(meta.jsonLd || []).map(jsonLdScript).join("\n")}
 <link rel="alternate" type="application/rss+xml" title="${cfg.name}" href="/rss"/>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
@@ -388,7 +403,7 @@ function newsletter(subscribeStatus: string | null = null) {
 
 export function renderHome(articles: Article[], subscribeStatus: string | null = null): string {
   if (!articles.length) {
-    return `${head({ title: `${cfg.name} — ${cfg.tagline}`, description: cfg.description })}
+    return `${head({ title: `${cfg.name} — ${cfg.tagline}`, description: cfg.description, path: "/", jsonLd: [websiteJsonLd()] })}
 ${nav()}
 <div style="max-width:600px;margin:120px auto;text-align:center;padding:0 32px;">
   <h1 style="font-family:${FONT};font-size:48px;margin-bottom:16px;">No articles yet</h1>
@@ -443,7 +458,7 @@ ${footer()}
     )
     .join("");
 
-  return `${head({ title: `${cfg.name} — ${cfg.tagline}`, description: cfg.description })}
+  return `${head({ title: `${cfg.name} — ${cfg.tagline}`, description: cfg.description, path: "/", jsonLd: [websiteJsonLd()] })}
 ${nav()}
 
 <section class="hero">
@@ -581,18 +596,44 @@ function renderPaywall(article: Article): string {
   </div>`;
 }
 
-export function renderArticle(article: Article, user: UserContext = defaultUser, comments: Comment[] = []): string {
+function renderRelated(article: Article, all: Article[]): string {
+  const related = relatedArticles(article, all, 4);
+  const cat = cfg.categories.find((c) => c.slug === article.category);
+  const items = related
+    .map((r) => `<li style="padding:14px 0;border-bottom:1px dashed ${P.ink}55;"><a href="/articles/${r.slug}" style="font-family:${FONT};font-weight:700;font-size:19px;line-height:1.2;">${r.title}</a><div style="font-size:14px;line-height:1.5;color:${P.ink}CC;margin-top:4px;">${r.excerpt}</div></li>`)
+    .join("");
+  const back = cat ? `<p style="margin-top:20px;font-size:12px;letter-spacing:0.18em;font-weight:700;"><a href="/category/${cat.slug}" style="color:${P.gold};">MORE FROM ${cat.name.toUpperCase()} →</a></p>` : "";
+  if (!items && !back) return "";
+  return `<aside class="related-articles" style="max-width:720px;margin:0 auto;padding:8px 32px 32px;">
+  ${items ? `<h2 style="font-family:${FONT};font-weight:800;font-size:26px;margin-bottom:8px;">Related articles</h2><ul style="list-style:none;padding:0;margin:0;">${items}</ul>` : ""}
+  ${back}
+</aside>`;
+}
+
+export function renderArticle(article: Article, user: UserContext = defaultUser, comments: Comment[] = [], allArticles: Article[] = [], crawlerAccess = false): string {
   const gated = isArticleGated(article);
-  const hasAccess = canUserAccessArticle(article, user);
-  const bodyContent = hasAccess
+  const hasAccess = canUserAccessArticle(article, user) || crawlerAccess;
+  const bodyInner = hasAccess
     ? article.body
     : `<p class="article-p" style="font-size:17px;line-height:1.7;">${article.excerpt}</p>\n${renderPaywall(article)}`;
+  const bodyContent = gated ? `<div class="${PAYWALL_SELECTOR.slice(1)}">${bodyInner}</div>` : bodyInner;
+  const cat = cfg.categories.find((c) => c.slug === article.category);
 
-  return `${head({ title: `${article.title} — ${cfg.name}`, description: article.excerpt, ogTitle: article.title, ogDescription: article.excerpt })}
+  return `${head({
+    title: `${article.title} — ${cfg.name}`,
+    description: article.excerpt,
+    ogTitle: article.title,
+    ogDescription: article.excerpt,
+    ogImage: article.heroImage,
+    path: `/articles/${article.slug}`,
+    type: "article",
+    publishedTime: article.date,
+    jsonLd: [articleJsonLd(article, gated)],
+  })}
 ${nav()}
 
 <article class="article-page">
-  <div class="article-meta">◆  ${article.category.toUpperCase()}  ·  ${article.readTime} MIN READ${gated && !hasAccess ? '  ·  🔒' : ''}</div>
+  <div class="article-meta">◆  ${cat ? `<a href="/category/${cat.slug}">${article.category.toUpperCase()}</a>` : article.category.toUpperCase()}  ·  ${article.readTime} MIN READ${gated && !hasAccess ? '  ·  🔒' : ''}</div>
   <h1>${article.title}</h1>
   <div class="article-byline">
     By <strong>${article.author}</strong>${article.authorRole ? ` · ${article.authorRole}` : ""}
@@ -605,13 +646,14 @@ ${nav()}
   ${bodyContent}
 </article>
 
+${renderRelated(article, allArticles)}
 ${renderComments(article.slug, comments, user)}
 ${newsletter()}
 ${footer()}
 </body></html>`;
 }
 
-export function renderListing(title: string, articles: Article[]): string {
+export function renderListing(title: string, articles: Article[], path?: string): string {
   const cards = articles.length
     ? articles.map((a) => `
     <article class="card" style="padding:28px 0;border-bottom:1px dashed ${P.ink}55;">
@@ -622,7 +664,7 @@ export function renderListing(title: string, articles: Article[]): string {
     </article>`).join("")
     : `<p style="font-size:17px;color:${P.muted};padding:48px 0;">No articles found in this section yet.</p>`;
 
-  return `${head({ title: `${title} — ${cfg.name}` })}
+  return `${head({ title: `${title} — ${cfg.name}`, path })}
 ${nav()}
 <section style="max-width:900px;margin:0 auto;padding:48px 32px;">
   <h1 style="font-family:${FONT};font-weight:800;font-size:clamp(36px,5vw,56px);line-height:1;margin-bottom:32px;border-bottom:2px solid ${P.ink};padding-bottom:16px;">${title}</h1>
@@ -644,7 +686,7 @@ export function renderSearch(query: string, articles: Article[]): string {
     </article>`).join("")
       : `<p style="font-size:17px;color:${P.muted};padding:48px 0;">No articles found for "${query}".</p>`;
 
-  return `${head({ title: `Search: ${query || "..."} — ${cfg.name}` })}
+  return `${head({ title: `Search: ${query || "..."} — ${cfg.name}`, noindex: true })}
 ${nav()}
 <section style="max-width:900px;margin:0 auto;padding:48px 32px;">
   <h1 style="font-family:${FONT};font-weight:800;font-size:36px;margin-bottom:24px;">Search</h1>
@@ -673,7 +715,7 @@ export function renderLogin(error?: string, success?: boolean): string {
         <p style="font-size:12px;color:${P.muted};margin-top:16px;text-align:center;">Active <a href="https://buymeacoffee.com/TheAncestralForge" style="color:${P.gold};">Buy Me a Coffee</a> members get full access to all articles + commenting.</p>
       </form>`;
 
-  return `${head({ title: `Sign In — ${cfg.name}` })}
+  return `${head({ title: `Sign In — ${cfg.name}`, noindex: true })}
 ${nav()}
 <section style="max-width:500px;margin:0 auto;padding:80px 32px;">
   ${content}
@@ -688,7 +730,7 @@ export function renderUnsubscribe(success: boolean): string {
        <p style="font-size:17px;color:${P.muted};margin-bottom:32px;">You will no longer receive emails from us.</p>`
     : `<h2 style="font-family:${FONT};font-size:32px;margin-bottom:16px;">We couldn't process your request.</h2>
        <p style="font-size:17px;color:${P.muted};margin-bottom:32px;">The link may be invalid or expired.</p>`;
-  return `${head({ title: `Unsubscribe — ${cfg.name}` })}
+  return `${head({ title: `Unsubscribe — ${cfg.name}`, noindex: true })}
 ${nav()}
 <div style="max-width:600px;margin:120px auto;text-align:center;padding:0 32px;">
   ${msg}
@@ -699,7 +741,7 @@ ${footer()}
 }
 
 export function render404(): string {
-  return `${head({ title: `Not Found — ${cfg.name}` })}
+  return `${head({ title: `Not Found — ${cfg.name}`, noindex: true })}
 ${nav()}
 <div style="max-width:600px;margin:120px auto;text-align:center;padding:0 32px;">
   <h1 style="font-family:${FONT};font-size:64px;margin-bottom:16px;">404</h1>
