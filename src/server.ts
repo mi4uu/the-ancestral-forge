@@ -2,14 +2,14 @@ import { Elysia } from "elysia";
 import { staticPlugin } from "@elysiajs/static";
 import { loadArticles, loadArticle } from "./content";
 import { getConfig } from "./config";
-import { renderHome, renderArticle, renderListing, renderSearch, renderLogin, render404 } from "./templates";
+import { renderHome, renderArticle, renderListing, renderSearch, renderLogin, render404, renderUnsubscribe } from "./templates";
 import { getSession, destroySession, createSession, SESSION_COOKIE_NAME } from "./auth/sessions";
 import { getUserContext } from "./auth/middleware";
 import { generateMagicToken, verifyMagicToken, sendMagicLinkEmail } from "./auth/magic-link";
 import { checkMembership } from "./auth/bmac";
 import { getComments, addComment, deleteComment } from "./community/storage";
 import { isArticleGated } from "./vault/paywall";
-import { addSubscriber, sendWelcomeEmail } from "./newsletter/subscribers";
+import { addSubscriber, sendWelcomeEmail, getSubscriberCount, verifyUnsubscribeToken, removeSubscriber } from "./newsletter/subscribers";
 
 const html = (body: string, status = 200) =>
   new Response(body, { status, headers: { "Content-Type": "text/html; charset=utf-8" } });
@@ -17,9 +17,10 @@ const html = (body: string, status = 200) =>
 const app = new Elysia()
   .use(staticPlugin({ prefix: "/images", assets: "public/images" }))
   // ── Home ─────────────────────────────────────────────────────
-  .get("/", async () => {
+  .get("/", async ({ query }) => {
     const articles = await loadArticles();
-    return html(renderHome(articles));
+    const subStatus = query.subscribed === "1" ? "success" : query.subscribe_error === "1" ? "error" : null;
+    return html(renderHome(articles, subStatus));
   })
 
   // ── Article ──────────────────────────────────────────────────
@@ -29,6 +30,16 @@ const app = new Elysia()
     const user = await getUserContext(reqHeaders["cookie"]);
     const comments = await getComments(params.slug);
     return html(renderArticle(article, user, comments));
+  })
+
+  // ── Unsubscribe ─────────────────────────────────────────────
+  .get("/unsubscribe", async ({ query }) => {
+    const token = query.token;
+    if (!token) return html(renderUnsubscribe(false));
+    const email = verifyUnsubscribeToken(token);
+    if (!email) return html(renderUnsubscribe(false));
+    await removeSubscriber(email);
+    return html(renderUnsubscribe(true));
   })
 
   // ── Archive (all articles) ──────────────────────────────────
@@ -90,25 +101,12 @@ const app = new Elysia()
 
   // ── Subscriber count API ─────────────────────────────────────
   .get("/api/subscriber-count", async () => {
-    const token = process.env.BMAC_API_TOKEN;
-    let real = 0;
-    if (token) {
-      try {
-        const res = await fetch("https://developers.buymeacoffee.com/api/v1/subscriptions?status=active", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        if (res.ok) {
-          const data = await res.json() as any;
-          real = data.data?.length || 0;
-          // handle pagination
-          if (data.total) real = data.total;
-        }
-      } catch {}
-    }
-    const display = real >= 10000
-      ? real.toLocaleString("en-US")
-      : (8000 + real).toLocaleString("en-US");
-    return Response.json({ real, display });
+    const cfg = getConfig();
+    const base = parseInt(cfg.subscriberCountText.replace(/,/g, ""), 10) || 0;
+    const localCount = await getSubscriberCount();
+    const total = base + localCount;
+    const display = total.toLocaleString("en-US");
+    return Response.json({ count: total, display });
   })
 
   // ── Sitemap ──────────────────────────────────────────────────

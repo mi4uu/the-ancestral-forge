@@ -1,3 +1,7 @@
 node_modules/
 data/
 .env
+
+video/*/output/
+video/manim-scenes/media/
+__pycache__/

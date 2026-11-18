@@ -60,9 +60,10 @@ ${ogImage ? `<meta property="og:image" content="${ogImage}"/>` : ""}
   /* Nav */
   .nav-header { position: sticky; top: 0; z-index: 30; background: ${P.bg}; border-bottom: 1px solid ${P.ink}; }
   .nav-eyebrow { display: flex; justify-content: space-between; align-items: center; padding: 6px 32px; font-size: 10px; letter-spacing: 0.18em; color: ${P.muted}; border-bottom: 1px solid ${P.ink}33; }
-  .nav-main { display: flex; align-items: center; justify-content: space-between; padding: 0 32px; height: 64px; }
-  .nav-logo { display: flex; align-items: center; gap: 12px; text-decoration: none; }
-  .nav-logo span { font-family: ${FONT}; font-weight: 700; letter-spacing: 0.22em; font-size: 15px; color: ${P.ink}; }
+  .nav-main { display: flex; align-items: center; justify-content: space-between; padding: 0 32px; min-height: 80px; }
+  .nav-logo { display: flex; align-items: center; gap: 16px; text-decoration: none; position: relative; }
+  .nav-logo img { border-radius: 0; display: block; position: absolute; left: 0; }
+  .nav-logo span { font-family: ${FONT}; font-weight: 700; letter-spacing: 0.22em; font-size: 15px; color: ${P.ink}; padding-left: 120px; }
   .nav-links { display: flex; align-items: center; gap: 40px; font-size: 13px; letter-spacing: 0.18em; text-transform: uppercase; }
   .nav-links a { position: relative; color: ${P.ink}; text-decoration: none; padding: 4px 0; }
   .nav-links a::after { content: ''; position: absolute; left: 0; right: 0; bottom: -2px; height: 1px; background: ${P.gold}; transform: scaleX(0); transform-origin: left; transition: transform 250ms; }
@@ -286,11 +287,7 @@ function nav() {
   <script>(function(){fetch('/api/subscriber-count').then(function(r){return r.json()}).then(function(d){if(!d.display)return;['sub-count','sub-count-nl'].forEach(function(id){var el=document.getElementById(id);if(el)el.textContent=d.display;});}).catch(function(){});})()</script>
   <nav class="nav-main">
     <a href="/" class="nav-logo">
-      <svg width="28" height="28" viewBox="0 0 40 40" fill="none" stroke="${P.ink}" stroke-width="1.6" stroke-linecap="round">
-        <path d="M 6 16 L 34 16 L 30 22 L 22 22 L 22 30 L 18 30 L 18 22 L 10 22 Z" fill="${P.ink}"/>
-        <path d="M 14 30 L 26 30 L 28 34 L 12 34 Z"/>
-        <path d="M 20 8 L 20 14 M 16 11 L 24 11"/>
-      </svg>
+      <img src="/images/logo.png" alt="${cfg.name}" style="height:90px;width:auto;object-fit:contain;bottom:-40px;"/>
       <span>${cfg.name.toUpperCase()}</span>
     </a>
     <div class="nav-links">
@@ -355,7 +352,15 @@ function declineCookies(){localStorage.setItem('cookie_consent','declined');wind
 </script>`;
 }
 
-function newsletter() {
+function newsletter(subscribeStatus: string | null = null) {
+  const feedbackHtml = subscribeStatus === "success"
+    ? `<div id="sub-msg" style="margin-bottom:24px;padding:14px 20px;background:${P.gold};color:${P.deep};font-size:14px;font-weight:700;letter-spacing:0.12em;">YOU'RE IN! CHECK YOUR INBOX FOR A WELCOME MESSAGE.</div>`
+    : subscribeStatus === "error"
+    ? `<div id="sub-msg" style="margin-bottom:24px;padding:14px 20px;background:#8B0000;color:${P.bg};font-size:14px;font-weight:700;letter-spacing:0.12em;">PLEASE ENTER A VALID EMAIL ADDRESS.</div>`
+    : "";
+  const dismissScript = subscribeStatus
+    ? `<script>(function(){history.replaceState(null,'','/');var m=document.getElementById('sub-msg');if(m)setTimeout(function(){m.style.transition='opacity 0.6s';m.style.opacity='0';setTimeout(function(){m.remove()},700)},6000);})()</script>`
+    : "";
   return `
 <section class="newsletter">
   <svg class="rays" viewBox="0 0 1600 600" preserveAspectRatio="xMidYMid slice">${newsletterRays()}</svg>
@@ -363,6 +368,7 @@ function newsletter() {
     <div class="tag">◆  THE  WEEKLY  TRANSMISSION  ◆</div>
     <h2>Join the <em>Resistance.</em></h2>
     <p class="desc">Get one piece of lost botanical knowledge or survival engineering sent to your inbox every week. No spam. No clickbait. Just the truth.</p>
+    ${feedbackHtml}
     <form method="POST" action="/subscribe">
       <div class="form-row">
         <input type="email" name="email" placeholder="your.address@homestead.com" required/>
@@ -377,10 +383,10 @@ function newsletter() {
       <span>✓  UNSUBSCRIBE  ANY  TIME</span>
     </div>
   </div>
-</section>`;
+</section>${dismissScript}`;
 }
 
-export function renderHome(articles: Article[]): string {
+export function renderHome(articles: Article[], subscribeStatus: string | null = null): string {
   if (!articles.length) {
     return `${head({ title: `${cfg.name} — ${cfg.tagline}`, description: cfg.description })}
 ${nav()}
@@ -521,7 +527,7 @@ ${archive.length ? `<section class="archive">
   </div>
 </section>` : ""}
 
-${newsletter()}
+${newsletter(subscribeStatus)}
 ${footer()}
 </body></html>`;
 }
@@ -672,6 +678,22 @@ ${nav()}
 <section style="max-width:500px;margin:0 auto;padding:80px 32px;">
   ${content}
 </section>
+${footer()}
+</body></html>`;
+}
+
+export function renderUnsubscribe(success: boolean): string {
+  const msg = success
+    ? `<h2 style="font-family:${FONT};font-size:32px;margin-bottom:16px;">You've been unsubscribed.</h2>
+       <p style="font-size:17px;color:${P.muted};margin-bottom:32px;">You will no longer receive emails from us.</p>`
+    : `<h2 style="font-family:${FONT};font-size:32px;margin-bottom:16px;">We couldn't process your request.</h2>
+       <p style="font-size:17px;color:${P.muted};margin-bottom:32px;">The link may be invalid or expired.</p>`;
+  return `${head({ title: `Unsubscribe — ${cfg.name}` })}
+${nav()}
+<div style="max-width:600px;margin:120px auto;text-align:center;padding:0 32px;">
+  ${msg}
+  <a href="/" class="btn-dispatch">Return to the Front Page</a>
+</div>
 ${footer()}
 </body></html>`;
 }

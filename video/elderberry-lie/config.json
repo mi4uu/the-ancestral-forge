@@ -1,0 +1,17 @@
+{
+  "slug": "elderberry-lie",
+  "voice": "en-US-GuyNeural",
+  "voice_rate": "+0%",
+  "voice_pitch": "-5Hz",
+  "resolution": [1920, 1080],
+  "fps": 30,
+  "transition_duration": 1.0,
+  "ken_burns_zoom": 0.05,
+  "pause_after_period": 0.3,
+  "background_music": null,
+  "background_music_volume": 0.08,
+  "color_grade": true,
+  "film_grain": true,
+  "text_overlays": true,
+  "min_segment_duration": 3.0
+}
