@@ -2,8 +2,9 @@
   "slug": "water-bath-canning-basics",
   "engine": "local",
   "date": "2026-11-19",
-  "status": "claimed",
+  "status": "failed",
   "claimedAt": "2026-11-19T07:00:03+01:00",
   "run": "20261119-070001-local",
-  "attempts": 1
+  "attempts": 1,
+  "reason": "still reject after one revision: Dead source link: https://www.cdc.gov/botulism/prevention/home-canned-foods returns 404 in both the frontmatter and ## Sources. I confirmed that https://www.cdc.gov/bo"
 }
