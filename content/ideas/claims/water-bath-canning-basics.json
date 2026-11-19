@@ -2,8 +2,9 @@
   "slug": "water-bath-canning-basics",
   "engine": "local",
   "date": "2026-11-19",
-  "status": "claimed",
+  "status": "failed",
   "claimedAt": "2026-11-19T07:06:11+01:00",
   "run": "20261119-070610-local",
-  "attempts": 2
+  "attempts": 2,
+  "reason": "still reject after one revision: Unsupported food-safety claims cited to [2][3]: 'Splitting the batch across days means each jar has a different acidity, and that difference is exactly what the proces"
 }
