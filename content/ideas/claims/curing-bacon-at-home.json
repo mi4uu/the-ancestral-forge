@@ -2,8 +2,10 @@
   "slug": "curing-bacon-at-home",
   "engine": "lobster",
   "date": "2026-11-20",
-  "status": "claimed",
+  "status": "published",
   "claimedAt": "2026-11-20T07:00:14+01:00",
   "run": "20261120-070012-lobster",
-  "attempts": 1
+  "attempts": 1,
+  "publishedAt": "2026-11-20T07:10:03+01:00",
+  "url": "https://ancestralforge.org/articles/curing-bacon-at-home"
 }
