@@ -102,7 +102,7 @@ tasks:
     after: { revise: success }
     exec:
       command: ["/home/mjl/forge-automation/repo/automation/bin/forge.py", "review2", "--run", "${{ with.run }}"]
-    timeout: "25m"
+    timeout: "60m"
 
   image:
     with:

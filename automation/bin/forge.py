@@ -30,6 +30,9 @@ SSH_IMG = ["ssh", "-F", "/dev/null", "-i", os.path.expanduser("~/.ssh/forge_img"
            "-o", "ConnectTimeout=15", "mi4u@192.168.1.137"]
 REVIEW_MODEL = os.environ.get("FORGE_REVIEW_MODEL", "claude-cli/claude-sonnet-5-5")
 REVISE_MODEL = os.environ.get("FORGE_REVISE_MODEL", "openai-codex/gpt-5.5")
+# Review rounds include the first review. The budget keeps the whole loop inside the engines' step timeouts.
+MAX_REVIEW_ROUNDS = int(os.environ.get("FORGE_MAX_REVIEW_ROUNDS", "5"))
+REVISE_LOOP_SECONDS = int(os.environ.get("FORGE_REVISE_LOOP_SECONDS", "1500"))
 
 ILLUSTRATION = {"the-apothecary": "herb-bundle", "the-living-pantry": "ferment-jar", "the-forge": "ice-house", "field-notes": "herb-bundle"}
 PERSONAS = AUTO / "personas"
@@ -344,7 +347,19 @@ def fill(template, st, **extra):
     return template
 
 
-def agent(run, step, agent_id, message, timeout=900, model=None, thinking=None):
+def agent(run, step, agent_id, message, timeout=900, model=None, thinking=None, tries=3):
+    """A failed agent call is usually transient (gateway memory pressure, an empty model reply), so retry with a pause."""
+    for attempt in range(tries):
+        try:
+            return agent_once(run, step, agent_id, message, timeout, model, thinking)
+        except RuntimeError as e:
+            if attempt == tries - 1:
+                raise
+            sys.stderr.write(f"{step}: {e}; retry {attempt + 2}/{tries}\n")
+            time.sleep(60 * (attempt + 1))
+
+
+def agent_once(run, step, agent_id, message, timeout=900, model=None, thinking=None):
     st = load(run)
     if st["engine"] == "local" and agent_id == "redaktor":
         return local_chat(run, step, message, timeout)
@@ -615,7 +630,7 @@ def do_review(run, round_):
     draft = (d / "draft.md").read_text()
     lint_issues, lint_hints = lint(st, draft)
     note = ("Round 1: list every issue you find, most important first." if round_ == 1 else
-            "Round 2, the final round after one revision. Return \"pass\" unless a safety breach, an unsupported or wrongly attributed factual claim, "
+            f"Round {round_}, after {round_ - 1} revision(s). Return \"pass\" unless a safety breach, an unsupported or wrongly attributed factual claim, "
             "a missing required element (Sources, Safety section, Not medical advice box) or a hard style violation (em dash, banned word) remains. "
             "Remaining style nits, repetition, length or taste are NOT grounds to reject or revise: mention them in issues but still pass. "
             "Only \"reject\" for a real safety or fact problem.")
@@ -645,31 +660,38 @@ def do_review(run, round_):
 def cmd_review1(a):
     def go():
         v = do_review(a.run, 1)
-        if v["verdict"] == "reject":
-            fail(a.run, "reviewer rejected the draft: " + v.get("reason", ""))
         return {"verdict": v["verdict"], "issues": len(v["issues"])}
     out(timed(a.run, "review1", go))
+
+
+def do_revise(run, round_):
+    """Rewrite draft.md against the issues of review round `round_`."""
+    st = load(run)
+    d = Path(run)
+    v = json.loads((d / f"review{round_}.json").read_text())
+    issues = v["issues"] or [v.get("reason", "")]
+    prompt = fill((PROMPTS / "revise.md").read_text(), st, ISSUES="\n".join(f"- {i}" for i in issues),
+                  DOSSIER=(d / "research.md").read_text(), DRAFT=(d / "draft.md").read_text())
+    step = "revise" if round_ == 1 else f"revise{round_}"
+    try:
+        text = agent(run, step, "redaktor", prompt, timeout=900, model=REVISE_MODEL, thinking="medium")
+    except RuntimeError:
+        text = agent(run, step, "redaktor", prompt, timeout=900)
+    article, wc, srcs = normalise(run, text)
+    (d / "draft.md").write_text(article)
+    st = load(run)
+    st["revised"] = True
+    st["revisions"] = round_
+    save(run, st)
+    return wc
 
 
 def cmd_revise(a):
     def go():
         st = load(a.run)
-        if st.get("verdict1") != "revise":
+        if st.get("verdict1") not in ("revise", "reject"):
             return {"revised": False}
-        d = Path(a.run)
-        v = json.loads((d / "review1.json").read_text())
-        prompt = fill((PROMPTS / "revise.md").read_text(), st, ISSUES="\n".join(f"- {i}" for i in v["issues"]),
-                      DOSSIER=(d / "research.md").read_text(), DRAFT=(d / "draft.md").read_text())
-        try:
-            text = agent(a.run, "revise", "redaktor", prompt, timeout=900, model=REVISE_MODEL, thinking="medium")
-        except RuntimeError:
-            text = agent(a.run, "revise", "redaktor", prompt, timeout=900)
-        article, wc, srcs = normalise(a.run, text)
-        (d / "draft.md").write_text(article)
-        st = load(a.run)
-        st["revised"] = True
-        save(a.run, st)
-        return {"revised": True, "words": wc}
+        return {"revised": True, "words": do_revise(a.run, 1)}
     out(timed(a.run, "revise", go))
 
 
@@ -678,12 +700,19 @@ def cmd_review2(a):
         st = load(a.run)
         if not st.get("revised"):
             return {"verdict": st.get("verdict1"), "skipped": True}
-        v = do_review(a.run, 2)
-        if v["verdict"] == "revise":
-            v["verdict"] = "reject" if v["issues"] and lint(st, (Path(a.run) / "draft.md").read_text())[0] else "pass"
-        if v["verdict"] != "pass":
-            fail(a.run, f"still {v['verdict']} after one revision: " + "; ".join(v["issues"][:3]))
-        return {"verdict": "pass"}
+        start = time.time()
+        round_ = 2
+        while True:
+            v = do_review(a.run, round_)
+            last = round_ >= MAX_REVIEW_ROUNDS or time.time() - start > REVISE_LOOP_SECONDS
+            if v["verdict"] == "revise" and last:
+                v["verdict"] = "reject" if v["issues"] and lint(st, (Path(a.run) / "draft.md").read_text())[0] else "pass"
+            if v["verdict"] == "pass":
+                return {"verdict": "pass", "rounds": round_}
+            if last:
+                fail(a.run, f"still {v['verdict']} after {round_ - 1} revisions: " + "; ".join(v["issues"][:3]))
+            do_revise(a.run, round_)
+            round_ += 1
     out(timed(a.run, "review2", go))
 
 
