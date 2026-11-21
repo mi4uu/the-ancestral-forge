@@ -2,8 +2,10 @@
   "slug": "saving-tomato-seeds",
   "engine": "nika",
   "date": "2026-11-21",
-  "status": "claimed",
+  "status": "published",
   "claimedAt": "2026-11-21T07:00:04+01:00",
   "run": "20261121-070002-nika",
-  "attempts": 1
+  "attempts": 1,
+  "publishedAt": "2026-11-21T07:15:12+01:00",
+  "url": "https://ancestralforge.org/articles/saving-tomato-seeds"
 }
