@@ -2,8 +2,10 @@
   "slug": "hugelkultur-beds-what-works",
   "engine": "local",
   "date": "2026-11-22",
-  "status": "claimed",
+  "status": "published",
   "claimedAt": "2026-11-22T07:04:31+01:00",
   "run": "20261122-070430-local",
-  "attempts": 2
+  "attempts": 2,
+  "publishedAt": "2026-11-22T07:15:29+01:00",
+  "url": "https://ancestralforge.org/articles/hugelkultur-beds-what-works"
 }
