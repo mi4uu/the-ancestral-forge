@@ -2,8 +2,10 @@
   "slug": "growing-and-braiding-garlic",
   "engine": "lobster",
   "date": "2026-11-23",
-  "status": "claimed",
+  "status": "published",
   "claimedAt": "2026-11-23T07:00:27+01:00",
   "run": "20261123-070025-lobster",
-  "attempts": 1
+  "attempts": 1,
+  "publishedAt": "2026-11-23T07:16:41+01:00",
+  "url": "https://ancestralforge.org/articles/growing-and-braiding-garlic"
 }
