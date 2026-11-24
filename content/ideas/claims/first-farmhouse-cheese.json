@@ -2,8 +2,10 @@
   "slug": "first-farmhouse-cheese",
   "engine": "nika",
   "date": "2026-11-24",
-  "status": "claimed",
+  "status": "published",
   "claimedAt": "2026-11-24T07:00:04+01:00",
   "run": "20261124-070002-nika",
-  "attempts": 1
+  "attempts": 1,
+  "publishedAt": "2026-11-24T07:11:12+01:00",
+  "url": "https://ancestralforge.org/articles/first-farmhouse-cheese"
 }
