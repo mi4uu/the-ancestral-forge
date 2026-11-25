@@ -2,8 +2,10 @@
   "slug": "solar-food-dehydrator",
   "engine": "local",
   "date": "2026-11-25",
-  "status": "claimed",
+  "status": "published",
   "claimedAt": "2026-11-25T07:00:04+01:00",
   "run": "20261125-070002-local",
-  "attempts": 1
+  "attempts": 1,
+  "publishedAt": "2026-11-25T07:19:04+01:00",
+  "url": "https://ancestralforge.org/articles/solar-food-dehydrator"
 }
