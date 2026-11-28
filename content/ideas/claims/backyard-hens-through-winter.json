@@ -2,8 +2,9 @@
   "slug": "backyard-hens-through-winter",
   "engine": "local",
   "date": "2026-11-28",
-  "status": "claimed",
+  "status": "failed",
   "claimedAt": "2026-11-28T07:00:02+01:00",
   "run": "20261128-070000-local",
-  "attempts": 1
+  "attempts": 1,
+  "reason": "step draft: draft lists fewer than 3 sources"
 }
