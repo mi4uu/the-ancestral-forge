@@ -2,8 +2,10 @@
   "slug": "backyard-hens-through-winter",
   "engine": "local",
   "date": "2026-11-28",
-  "status": "claimed",
+  "status": "published",
   "claimedAt": "2026-11-28T07:06:52+01:00",
   "run": "20261128-070650-local",
-  "attempts": 2
+  "attempts": 2,
+  "publishedAt": "2026-11-28T07:20:53+01:00",
+  "url": "https://ancestralforge.org/articles/backyard-hens-through-winter"
 }
